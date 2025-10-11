@@ -1,6 +1,7 @@
 'use client';
 
 import { Geist, Geist_Mono } from "next/font/google";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 import { Header } from "../components/Header";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -25,13 +26,14 @@ export default function RootLayout({
 }>) {
   const [isClient, setIsClient] = useState(false);
   const user = useSessionStore((state) => state.user);
+  const pathname = usePathname();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   // Check if current path is an auth page (signin/signup)
-  const isAuthPage = typeof window !== 'undefined' && (window.location.pathname === '/signin' || window.location.pathname === '/signup');
+  const isAuthPage = pathname === '/signin' || pathname === '/signup';
 
   return (
     <html lang="en">
