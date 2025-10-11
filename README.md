@@ -79,26 +79,25 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 
 O app está configurado para usar Supabase para persistência de dados. As credenciais estão em `.env.local`.
 
-### Configuração Inicial
+### Configuração da Autenticação
 
-1. **Certifique-se de que seu projeto Supabase está ativo**: No dashboard do Supabase, verifique se o projeto não está pausado.
+1. **Ative a autenticação no Supabase**:
+   - Acesse [Supabase Dashboard > Authentication](https://supabase.com/dashboard/project/ntiadxsvduowjvxuahzy/auth)
+   - Configure os provedores desejados
 
-2. **Faça login no Supabase CLI**:
-   ```bash
-   supabase login
-   ```
-   Isso abrirá o navegador para autenticação.
+2. **Configure Google OAuth** (opcional):
+   - No Google Cloud Console, crie um projeto ou selecione existente
+   - Ative a Google+ API
+   - Crie credenciais OAuth 2.0
+   - Adicione os URIs autorizados:
+     - `https://ntiadxsvduowjvxuahzy.supabase.co/auth/v1/callback`
+   - No Supabase Dashboard > Authentication > Providers:
+     - Ative "Google"
+     - Cole o Client ID e Client Secret
 
-3. **Link o projeto local ao remoto**:
-   ```bash
-   supabase link --project-ref ntiadxsvduowjvxuahzy
-   ```
-
-4. **Aplique as migrações**:
-   ```bash
-   supabase db push
-   ```
-   Isso criará as tabelas no seu banco Supabase.
+3. **Configurações de email** (para confirmação de cadastro):
+   - No Supabase Dashboard > Authentication > Settings
+   - Configure SMTP ou use o serviço padrão do Supabase
 
 ### Migração de Dados Mockados
 
