@@ -2,8 +2,11 @@
 // For MVP, this is a placeholder. In production, use pages/api/socket.ts or custom server.
 // See socketServer.ts for logic.
 
-import { NextRequest } from 'next/server';
+import { createSuccessResponse, withErrorHandler } from '../../../lib/errors';
 
-export async function GET(request: NextRequest) {
-  return new Response('Socket endpoint', { status: 200 });
+async function handler() {
+  // This is a placeholder - actual socket implementation would be in a custom server
+  return createSuccessResponse({ message: 'Socket endpoint placeholder' });
 }
+
+export const GET = withErrorHandler(handler);

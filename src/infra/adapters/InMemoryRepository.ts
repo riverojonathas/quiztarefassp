@@ -19,7 +19,7 @@ export class InMemoryRepository
     try {
       this.questions = await repo.getAllQuestions();
       this.leaderboard = await repo.getLeaderboard('geral', 'all');
-    } catch (error) {
+    } catch (_error) {
       console.warn('Failed to load from external repo, using mock data');
     }
   }

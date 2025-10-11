@@ -1,8 +1,15 @@
-import { User, Question, Match, LeaderboardEntry, UserId, RoomId } from './models';
+import { User, UserProfile, Question, Match, LeaderboardEntry, UserId, RoomId } from './models';
 
 export interface UserRepository {
   getUser(id: UserId): Promise<User | null>;
   createUser(user: User): Promise<void>;
+}
+
+export interface UserProfileRepository {
+  getUserProfile(userId: UserId): Promise<UserProfile | null>;
+  createUserProfile(profile: UserProfile): Promise<void>;
+  updateUserProfile(profile: UserProfile): Promise<void>;
+  upsertUserProfile(profile: UserProfile): Promise<void>;
 }
 
 export interface QuestionRepository {

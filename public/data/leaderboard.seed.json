@@ -1,0 +1,26 @@
+[
+  {
+    "scope": "turma",
+    "scopeId": "turmaA",
+    "userId": "usuario1",
+    "score": 1500
+  },
+  {
+    "scope": "turma",
+    "scopeId": "turmaA",
+    "userId": "usuario2",
+    "score": 1400
+  },
+  {
+    "scope": "escola",
+    "scopeId": "escolaX",
+    "userId": "usuario1",
+    "score": 1600
+  },
+  {
+    "scope": "geral",
+    "scopeId": "all",
+    "userId": "usuario1",
+    "score": 1700
+  }
+]

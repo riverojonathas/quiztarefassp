@@ -1,0 +1,44 @@
+[
+  {
+    "id": "math1",
+    "statement": "Quanto é 2 + 2?",
+    "choices": [
+      { "id": "a", "text": "3", "isCorrect": false },
+      { "id": "b", "text": "4", "isCorrect": true },
+      { "id": "c", "text": "5", "isCorrect": false },
+      { "id": "d", "text": "6", "isCorrect": false }
+    ],
+    "difficulty": 1,
+    "tags": ["BNCC-M1", "Soma"],
+    "skill": "Aritmética Básica",
+    "timeSuggestedSec": 10
+  },
+  {
+    "id": "math2",
+    "statement": "Qual é a raiz quadrada de 16?",
+    "choices": [
+      { "id": "a", "text": "2", "isCorrect": false },
+      { "id": "b", "text": "4", "isCorrect": true },
+      { "id": "c", "text": "8", "isCorrect": false },
+      { "id": "d", "text": "16", "isCorrect": false }
+    ],
+    "difficulty": 2,
+    "tags": ["BNCC-M2", "Raiz Quadrada"],
+    "skill": "Álgebra",
+    "timeSuggestedSec": 15
+  },
+  {
+    "id": "math3",
+    "statement": "Resolva: 3x + 5 = 17",
+    "choices": [
+      { "id": "a", "text": "x = 4", "isCorrect": true },
+      { "id": "b", "text": "x = 6", "isCorrect": false },
+      { "id": "c", "text": "x = 8", "isCorrect": false },
+      { "id": "d", "text": "x = 12", "isCorrect": false }
+    ],
+    "difficulty": 3,
+    "tags": ["BNCC-M3", "Equações"],
+    "skill": "Equações Lineares",
+    "timeSuggestedSec": 20
+  }
+]

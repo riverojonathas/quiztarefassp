@@ -7,6 +7,24 @@ export interface User {
   name: string;
 }
 
+export interface UserProfile {
+  id: string;
+  userId: UserId;
+  avatarSeed?: string;
+  avatarUrl?: string;
+  nickname?: string;
+  notifications: {
+    gameInvites: boolean;
+    dailyReminders: boolean;
+    achievements: boolean;
+    leaderboardUpdates: boolean;
+  };
+  theme: 'light' | 'dark';
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Choice {
   id: string;
   text: string;

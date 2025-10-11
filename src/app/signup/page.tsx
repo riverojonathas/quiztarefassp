@@ -104,7 +104,7 @@ export default function SignUpPage() {
     setIsGoogleLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data: _data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/home`
@@ -122,7 +122,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
+    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Criar Conta</CardTitle>

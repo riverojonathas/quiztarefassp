@@ -1,0 +1,44 @@
+[
+  {
+    "id": "port1",
+    "statement": "Qual é o plural de 'cão'?",
+    "choices": [
+      { "id": "a", "text": "cães", "isCorrect": true },
+      { "id": "b", "text": "cãos", "isCorrect": false },
+      { "id": "c", "text": "cões", "isCorrect": false },
+      { "id": "d", "text": "cãens", "isCorrect": false }
+    ],
+    "difficulty": 1,
+    "tags": ["BNCC-P1", "Plural"],
+    "skill": "Gramática",
+    "timeSuggestedSec": 10
+  },
+  {
+    "id": "port2",
+    "statement": "O que significa 'ubíquo'?",
+    "choices": [
+      { "id": "a", "text": "Raro", "isCorrect": false },
+      { "id": "b", "text": "Presente em todos os lugares", "isCorrect": true },
+      { "id": "c", "text": "Velho", "isCorrect": false },
+      { "id": "d", "text": "Novo", "isCorrect": false }
+    ],
+    "difficulty": 2,
+    "tags": ["BNCC-P2", "Vocabulário"],
+    "skill": "Léxico",
+    "timeSuggestedSec": 15
+  },
+  {
+    "id": "port3",
+    "statement": "Identifique a oração subordinada: 'Ele disse que viria.'",
+    "choices": [
+      { "id": "a", "text": "'Ele disse'", "isCorrect": false },
+      { "id": "b", "text": "'que viria'", "isCorrect": true },
+      { "id": "c", "text": "Toda a frase", "isCorrect": false },
+      { "id": "d", "text": "Nenhuma", "isCorrect": false }
+    ],
+    "difficulty": 3,
+    "tags": ["BNCC-P3", "Sintaxe"],
+    "skill": "Análise Sintática",
+    "timeSuggestedSec": 20
+  }
+]

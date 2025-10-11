@@ -3,6 +3,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "../components/Header";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { PageTransition } from "../components/PageTransition";
 import { useSessionStore } from "../state/useSessionStore";
 import { useEffect, useState } from "react";
 
@@ -37,8 +39,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {isClient && user && <Header />}
-        {children}
+        <ErrorBoundary>
+          {isClient && user && <Header />}
+          <div className="min-h-screen flex flex-col">
+            <div className="flex-1">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </div>
+            {isClient && user && <div className="h-20 safe-area-bottom" />}
+          </div>
+        </ErrorBoundary>
       </body>
     </html>
   );

@@ -1,136 +1,105 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSessionStore } from '../state/useSessionStore';
+import { useRouter, usePathname } from 'next/navigation';
+import { MemoizedNavItem } from './MemoizedNavItem';
+import { useSwipe } from '../hooks/useSwipe';
+import { useBackGesture } from '../hooks/useBackGesture';
 
 export function Header() {
-  const user = useSessionStore((state) => state.user);
-  const logout = useSessionStore((state) => state.logout);
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const navRef = useSwipe({
+    onSwipeLeft: () => {
+      const currentIndex = navItems.findIndex(item => isActive(item.href));
+      const nextIndex = (currentIndex + 1) % navItems.length;
+      handleNavigation(navItems[nextIndex].href);
+    },
+    onSwipeRight: () => {
+      const currentIndex = navItems.findIndex(item => isActive(item.href));
+      const prevIndex = currentIndex === 0 ? navItems.length - 1 : currentIndex - 1;
+      handleNavigation(navItems[prevIndex].href);
+    },
+  });
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/signin');
+  useBackGesture();
+
+  const handleNavigation = async (href: string) => {
+    if (pathname === href) return;
+
+    setLoadingStates(prev => ({ ...prev, [href]: true }));
+    router.push(href);
+    setLoadingStates(prev => ({ ...prev, [href]: false }));
   };
 
   const navItems = [
-    { href: '/home', label: '🏠 Home', description: 'Página inicial' },
-    { href: '/lobby', label: '🎮 Lobby', description: 'Criar/Entrar em salas' },
-    { href: '/ranking', label: '🏆 Ranking', description: 'Ver classificações' },
-    { href: '/analytics', label: '📊 Analytics', description: 'Suas estatísticas' },
+    { href: '/home', icon: 'Home', label: 'Home', description: 'Página inicial' },
+    { href: '/ranking', icon: 'Trophy', label: 'Ranking', description: 'Ver classificações' },
+    { href: '/play', icon: 'Play', label: 'Jogar', description: 'Escolher modo de jogo' },
+    { href: '/rooms', icon: 'Users', label: 'Salas', description: 'Criar/Acessar salas' },
+    { href: '/settings', icon: 'Settings', label: 'Config', description: 'Configurações' },
   ];
 
+  const isActive = (href: string) => {
+    if (href === '/home') {
+      return pathname === '/home' || pathname === '/';
+    }
+    return pathname === href || pathname.startsWith(href + '/');
+  };
+
   return (
-    <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
-          <Link href="/home" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
-              <span className="text-white font-bold text-lg">Q</span>
-            </div>
-            <span className="text-white font-bold text-xl hidden sm:block">QuizMaster</span>
-          </Link>
+    <nav
+      ref={navRef}
+      role="navigation"
+      aria-label="Navegação principal"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 backdrop-blur-md border-t border-indigo-200/50 shadow-xl pb-safe"
+    >
+      <div className="flex items-center justify-center px-2 py-2 max-w-md mx-auto relative">
+        {navItems.map((item, index) => {
+          const active = isActive(item.href);
+          const isLoading = loadingStates[item.href];
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="relative px-4 py-2 text-white/90 hover:text-white font-medium rounded-lg hover:bg-white/10 transition-all duration-200 group"
-                title={item.description}
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* User Section */}
-          <div className="flex items-center space-x-3">
-            {user && (
-              <div className="hidden sm:flex items-center space-x-2 text-white/90">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="text-sm font-medium">{user.name}</span>
-              </div>
-            )}
-
-            {/* Logout Button */}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
-              >
-                <span>🚪</span>
-                <span className="hidden sm:inline">Sair</span>
-              </button>
-            )}
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-white/10">
-            <nav className="py-4 space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors flex items-center space-x-3"
-                  onClick={() => setIsMenuOpen(false)}
+          // Botão Jogar destacado no centro
+          if (item.href === '/play') {
+            return (
+              <div key={item.href} className="mx-4">
+                <button
+                  onClick={() => handleNavigation(item.href)}
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 group border-2 border-white/20"
+                  aria-label="Jogar - Escolher modo de jogo"
                 >
-                  <span className="text-lg">{item.label.split(' ')[0]}</span>
-                  <span>{item.label.split(' ').slice(1).join(' ')}</span>
-                </Link>
-              ))}
-
-              {user && (
-                <div className="px-4 py-3 border-t border-white/10 mt-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white font-medium">
-                        {user.name.charAt(0).toUpperCase()}
-                      </span>
+                  <div className="flex flex-col items-center">
+                    <div className={`w-6 h-6 transition-all duration-300 ${isLoading ? 'animate-spin' : 'group-hover:scale-110'}`}>
+                      {isLoading ? (
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-white font-medium">{user.name}</p>
-                      <p className="text-white/60 text-sm">Logado</p>
-                    </div>
+                    <span className="text-xs font-bold mt-1 drop-shadow-sm">JOGAR</span>
                   </div>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <span>🚪</span>
-                    <span>Sair da conta</span>
-                  </button>
-                </div>
-              )}
-            </nav>
-          </div>
-        )}
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <MemoizedNavItem
+              key={item.href}
+              item={item}
+              isActive={active}
+              isLoading={isLoading}
+              onNavigate={handleNavigation}
+            />
+          );
+        })}
       </div>
-    </header>
+    </nav>
   );
 }

@@ -1,8 +1,8 @@
-import { UserRepository, QuestionRepository, MatchRepository, LeaderboardRepository } from '../../domain/repositories';
-import { User, Question, Match, LeaderboardEntry, UserId, RoomId } from '../../domain/models';
+import { UserRepository, UserProfileRepository, QuestionRepository, MatchRepository, LeaderboardRepository } from '../../domain/repositories';
+import { User, UserProfile, Question, Match, LeaderboardEntry, UserId, RoomId } from '../../domain/models';
 import { supabase } from '../../lib/supabase';
 
-export class SupabaseRepository implements UserRepository, QuestionRepository, MatchRepository, LeaderboardRepository {
+export class SupabaseRepository implements UserRepository, UserProfileRepository, QuestionRepository, MatchRepository, LeaderboardRepository {
   // UserRepository
   async getUser(id: UserId): Promise<User | null> {
     const { data, error } = await supabase
@@ -19,6 +19,79 @@ export class SupabaseRepository implements UserRepository, QuestionRepository, M
     const { error } = await supabase
       .from('users')
       .insert({ id: user.id, username: user.name });
+
+    if (error) throw error;
+  }
+
+  // UserProfileRepository
+  async getUserProfile(userId: UserId): Promise<UserProfile | null> {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) return null;
+    return {
+      id: data.id,
+      userId: data.user_id,
+      avatarSeed: data.avatar_seed,
+      avatarUrl: data.avatar_url,
+      nickname: data.nickname,
+      notifications: data.notifications,
+      theme: data.theme,
+      language: data.language,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    } as UserProfile;
+  }
+
+  async createUserProfile(profile: UserProfile): Promise<void> {
+    const { error } = await supabase
+      .from('user_profiles')
+      .insert({
+        user_id: profile.userId,
+        avatar_seed: profile.avatarSeed,
+        avatar_url: profile.avatarUrl,
+        nickname: profile.nickname,
+        notifications: profile.notifications,
+        theme: profile.theme,
+        language: profile.language,
+      });
+
+    if (error) throw error;
+  }
+
+  async updateUserProfile(profile: UserProfile): Promise<void> {
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        avatar_seed: profile.avatarSeed,
+        avatar_url: profile.avatarUrl,
+        nickname: profile.nickname,
+        notifications: profile.notifications,
+        theme: profile.theme,
+        language: profile.language,
+      })
+      .eq('user_id', profile.userId);
+
+    if (error) throw error;
+  }
+
+  async upsertUserProfile(profile: UserProfile): Promise<void> {
+    const { error } = await supabase
+      .from('user_profiles')
+      .upsert({
+        user_id: profile.userId,
+        avatar_seed: profile.avatarSeed,
+        avatar_url: profile.avatarUrl,
+        nickname: profile.nickname,
+        notifications: profile.notifications,
+        theme: profile.theme,
+        language: profile.language,
+      }, {
+        onConflict: 'user_id'
+      });
 
     if (error) throw error;
   }
