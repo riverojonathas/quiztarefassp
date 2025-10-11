@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Header } from '../../components/Header';
 
 export default function PlayPage() {
   const router = useRouter();
@@ -17,9 +16,7 @@ export default function PlayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Header />
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
       <main className="pt-20 px-4 pb-24">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">

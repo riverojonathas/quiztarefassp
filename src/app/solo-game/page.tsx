@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '../../components/Header';
 
 interface Question {
   id: string;
@@ -113,9 +112,7 @@ export default function SoloGamePage() {
 
   if (gameFinished) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <Header />
-
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
         <main className="pt-20 px-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <div className="bg-white rounded-2xl p-8 shadow-lg">
@@ -156,9 +153,7 @@ export default function SoloGamePage() {
 
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <Header />
-
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
         <main className="pt-20 px-4 pb-24">
           <div className="max-w-md mx-auto text-center">
             <div className="bg-white rounded-2xl p-8 shadow-lg">
@@ -205,9 +200,7 @@ export default function SoloGamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Header />
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
       <main className="pt-20 px-4 pb-24">
         <div className="max-w-md mx-auto">
           {/* Header do jogo */}
