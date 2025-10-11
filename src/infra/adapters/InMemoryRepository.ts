@@ -15,7 +15,7 @@ export class InMemoryRepository
   private leaderboard: LeaderboardEntry[] = [];
 
   // For loading from Supabase or other sources
-  async loadFromExternal(repo: any) {
+  async loadFromExternal(repo: { getAllQuestions: () => Promise<Question[]>, getLeaderboard: (scope: string, scopeId: string) => Promise<LeaderboardEntry[]> }) {
     try {
       this.questions = await repo.getAllQuestions();
       this.leaderboard = await repo.getLeaderboard('geral', 'all');

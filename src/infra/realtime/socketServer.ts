@@ -2,10 +2,10 @@ import { Server as NetServer } from 'http';
 import { NextApiResponse } from 'next';
 import { Server as ServerIO } from 'socket.io';
 import { InMemoryRepository } from '../adapters/InMemoryRepository';
-import { Match, PlayerState, UserId, RoomId } from '../../domain/models';
+import { Match, PlayerState, UserId, RoomId, User } from '../../domain/models';
 
 export type NextApiResponseServerIo = NextApiResponse & {
-  socket: any & {
+  socket: {
     server: NetServer & {
       io: ServerIO;
     };
@@ -38,7 +38,7 @@ export const initSocketServer = (httpServer: NetServer) => {
       socket.emit('room:created', { roomId });
     });
 
-    socket.on('room:join', async ({ roomId, user }: { roomId: RoomId; user: any }) => {
+    socket.on('room:join', async ({ roomId, user }: { roomId: RoomId; user: User }) => {
       socket.join(roomId);
       const match = await repo.getMatch(roomId);
       if (match) {
@@ -56,11 +56,11 @@ export const initSocketServer = (httpServer: NetServer) => {
       }
     });
 
-    socket.on('room:start', async ({ roomId, totalRounds, mode }: { roomId: RoomId; totalRounds: number; mode: string }) => {
+    socket.on('room:start', async ({ roomId, totalRounds, mode }: { roomId: RoomId; totalRounds: number; mode: 'solo' | 'dupla' | 'sala' }) => {
       const match = await repo.getMatch(roomId);
       if (match) {
         match.totalRounds = totalRounds;
-        match.mode = mode as any;
+        match.mode = mode;
         match.round = 1;
         await repo.updateMatch(match);
         io.to(roomId).emit('room:started', match);

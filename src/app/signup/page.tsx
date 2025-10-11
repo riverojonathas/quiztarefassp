@@ -8,11 +8,12 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { User } from '../../domain/models';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const setUser = useSessionStore((state) => state.setUser);
@@ -23,7 +24,7 @@ export default function LoginPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Get or create user in our users table
+        // Get user from our users table
         const { data: existingUser } = await supabase
           .from('users')
           .select('*')
@@ -33,20 +34,6 @@ export default function LoginPage() {
         if (existingUser) {
           setUser({ id: existingUser.id, name: existingUser.username });
           router.push('/home');
-        } else {
-          // Create user record
-          const { error } = await supabase
-            .from('users')
-            .insert({
-              id: user.id,
-              username: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-              email: user.email
-            });
-
-          if (!error) {
-            setUser({ id: user.id, name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User' });
-            router.push('/home');
-          }
         }
       }
     };
@@ -63,38 +50,48 @@ export default function LoginPage() {
           .eq('id', user.id)
           .single();
 
-        if (!existingUser) {
-          await supabase
-            .from('users')
-            .insert({
-              id: user.id,
-              username: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-              email: user.email
-            });
+        if (existingUser) {
+          setUser({ id: existingUser.id, name: existingUser.username });
+          router.push('/home');
         }
-
-        setUser({ id: user.id, name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User' });
-        router.push('/home');
       }
     });
 
     return () => subscription.unsubscribe();
   }, [setUser, router]);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert('As senhas não coincidem');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username: username || email.split('@')[0]
+          }
+        }
       });
 
       if (error) {
-        alert('Erro no login: ' + error.message);
+        alert('Erro no cadastro: ' + error.message);
       } else if (data.user) {
-        // User will be handled by the auth state change listener
+        // User created successfully, they can now sign in
+        alert('Conta criada com sucesso! Você pode fazer login agora.');
+        router.push('/signin');
       }
     } catch (error) {
       alert('Erro inesperado: ' + error);
@@ -103,7 +100,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     setIsGoogleLoading(true);
 
     try {
@@ -115,7 +112,7 @@ export default function LoginPage() {
       });
 
       if (error) {
-        alert('Erro no login com Google: ' + error.message);
+        alert('Erro no cadastro com Google: ' + error.message);
       }
     } catch (error) {
       alert('Erro inesperado: ' + error);
@@ -124,40 +121,23 @@ export default function LoginPage() {
     }
   };
 
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      alert('Preencha email e senha');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        alert('Erro no cadastro: ' + error.message);
-      } else {
-        alert('Cadastro realizado! Verifique seu email para confirmar.');
-      }
-    } catch (error) {
-      alert('Erro inesperado: ' + error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center">Entrar no Quiz</CardTitle>
+          <CardTitle className="text-center">Criar Conta</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={handleEmailSignUp} className="space-y-4">
+            <div>
+              <Label htmlFor="username">Nome de usuário (opcional)</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Seu nome"
+              />
+            </div>
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -176,18 +156,24 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Sua senha"
+                placeholder="Mínimo 6 caracteres"
                 required
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? 'Entrando...' : 'Entrar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={handleSignUp} disabled={isLoading}>
-                Cadastrar
-              </Button>
+            <div>
+              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Digite a senha novamente"
+                required
+              />
             </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Criando conta...' : 'Criar Conta'}
+            </Button>
           </form>
 
           <div className="relative">
@@ -200,13 +186,24 @@ export default function LoginPage() {
           </div>
 
           <Button
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleSignUp}
             variant="outline"
             className="w-full"
             disabled={isGoogleLoading}
           >
             {isGoogleLoading ? 'Conectando...' : 'Continuar com Google'}
           </Button>
+
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">Já tem conta? </span>
+            <Button
+              variant="link"
+              className="p-0 h-auto font-normal"
+              onClick={() => router.push('/signin')}
+            >
+              Fazer login
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

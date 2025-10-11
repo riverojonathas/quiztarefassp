@@ -10,7 +10,7 @@ import { LeaderboardEntry } from '../../domain/models';
 
 export default function HomePage() {
   const user = useSessionStore((state) => state.user);
-  const setUser = useSessionStore((state) => state.setUser);
+  const logout = useSessionStore((state) => state.logout);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      router.push('/signin');
       return;
     }
 
@@ -57,8 +57,8 @@ export default function HomePage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null as any); // Will redirect to login
-    router.push('/login');
+    logout();
+    router.push('/signin');
   };
 
   if (!user) {

@@ -4,14 +4,14 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 
 ## Funcionalidades do MVP
 
-- **Login de demonstração**: Usuários `usuario1`, `usuario2`, `usuario3` (senha: `123`).
-- **Salas de jogo**: Criação/entrada por código curto.
-- **Modos**: Solo, dupla, sala inteira.
-- **Rodadas cronometradas**: Perguntas objetivas com feedback instantâneo.
-- **Placar e ranking**: Da sala e geral (dados fake).
-- **Adaptação de dificuldade**: Baseada em desempenho.
-- **Painel do Host**: Controle de rounds.
-- **Analytics**: Acerto por habilidade, tempo médio, streak.
+- **Autenticação completa**: Login/cadastro com email ou Google OAuth
+- **Salas de jogo**: Criação/entrada por código curto
+- **Modos**: Solo, dupla, sala inteira
+- **Rodadas cronometradas**: Perguntas objetivas com feedback instantâneo
+- **Placar e ranking**: Da sala e geral (dados reais)
+- **Adaptação de dificuldade**: Baseada em desempenho
+- **Painel do Host**: Controle de rounds
+- **Analytics**: Acerto por habilidade, tempo médio, streak
 
 ## Stack Tecnológica
 
@@ -63,10 +63,18 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 
 ## Demonstração
 
-1. **Login**: Use `usuario1`, `usuario2` ou `usuario3` com senha `123`.
-2. **Lobby**: Crie uma sala ou entre com código (ex.: `AB12`).
-3. **Sala**: Jogue perguntas, veja timer e placar.
-4. **Fim**: Veja pódio, ranking e analytics.
+1. **Cadastro/Login**:
+   - Acesse `/signin` para fazer login
+   - Ou `/signup` para criar uma conta
+   - Use email/senha ou Google OAuth
+
+2. **Home**: Veja seu ranking e estatísticas pessoais
+
+3. **Lobby**: Crie uma sala ou entre com código (ex.: `AB12`)
+
+4. **Sala**: Jogue perguntas, veja timer e placar
+
+5. **Fim**: Veja pódio, ranking e analytics
 
 ## Notas Técnicas
 
