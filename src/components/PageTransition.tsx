@@ -11,25 +11,22 @@ interface PageTransitionProps {
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 20,
-    scale: 0.95,
+    y: 5,
   },
   in: {
     opacity: 1,
     y: 0,
-    scale: 1,
   },
   out: {
     opacity: 0,
-    y: -20,
-    scale: 1.05,
+    y: -5,
   },
 };
 
 const pageTransition = {
   type: 'tween' as const,
-  ease: 'anticipate' as const,
-  duration: 0.4,
+  ease: 'easeOut' as const,
+  duration: 0.2,
 };
 
 export function PageTransition({ children }: PageTransitionProps) {
