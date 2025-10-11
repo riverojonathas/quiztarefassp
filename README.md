@@ -66,7 +66,7 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 1. **Cadastro/Login**:
    - Acesse `/signin` para fazer login
    - Ou `/signup` para criar uma conta
-   - Use email/senha ou Google OAuth
+   - Use email/senha ou Google OAuth (sem confirmação de email)
 
 2. **Home**: Veja seu ranking e estatísticas pessoais
 
