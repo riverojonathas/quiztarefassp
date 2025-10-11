@@ -119,6 +119,26 @@
   body {
     @apply bg-background text-foreground m-0 p-0;
   }
+
+  /* Mobile optimizations */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Improve touch targets */
+  button, input, select, textarea {
+    @apply min-h-[44px];
+  }
+
+  /* Better focus states for mobile */
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
 }
 
 /* Animações personalizadas */

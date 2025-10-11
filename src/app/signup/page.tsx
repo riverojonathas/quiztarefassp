@@ -122,83 +122,87 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Criar Conta</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-8 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-sm sm:max-w-md mx-auto">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-center text-xl sm:text-2xl">Criar Conta</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-4 sm:px-6">
           <form onSubmit={handleEmailSignUp} className="space-y-4">
-            <div>
-              <Label htmlFor="username">Nome de usuário (opcional)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium">Nome de usuário (opcional)</Label>
               <Input
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Seu nome"
+                className="h-11 text-base"
               />
             </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
+                className="h-11 text-base"
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mínimo 6 caracteres"
+                className="h-11 text-base"
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmar Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Digite a senha novamente"
+                className="h-11 text-base"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
               {isLoading ? 'Criando conta...' : 'Criar Conta'}
             </Button>
           </form>
 
-          <div className="relative">
+          <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Ou</span>
+              <span className="bg-white dark:bg-gray-800 px-3 text-gray-500 dark:text-gray-400">Ou</span>
             </div>
           </div>
 
           <Button
             onClick={handleGoogleSignUp}
             variant="outline"
-            className="w-full"
+            className="w-full h-11 text-base font-medium border-2"
             disabled={isGoogleLoading}
           >
             {isGoogleLoading ? 'Conectando...' : 'Continuar com Google'}
           </Button>
 
-          <div className="text-center text-sm">
-            <span className="text-muted-foreground">Já tem conta? </span>
+          <div className="text-center text-sm pt-2">
+            <span className="text-gray-600 dark:text-gray-400">Já tem conta? </span>
             <Button
               variant="link"
-              className="p-0 h-auto font-normal"
+              className="p-0 h-auto font-medium text-blue-600 hover:text-blue-700"
               onClick={() => router.push('/signin')}
             >
               Fazer login

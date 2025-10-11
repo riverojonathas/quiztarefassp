@@ -30,24 +30,28 @@ export default function RootLayout({
     setIsClient(true);
   }, []);
 
+  // Check if current path is an auth page (signin/signup)
+  const isAuthPage = typeof window !== 'undefined' && (window.location.pathname === '/signin' || window.location.pathname === '/signup');
+
   return (
     <html lang="en">
       <head>
         <title>Quiz App</title>
         <meta name="description" content="Competitive Quiz App Demo" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorBoundary>
-          {isClient && user && <Header />}
+          {isClient && user && !isAuthPage && <Header />}
           <div className="min-h-screen flex flex-col">
             <div className="flex-1">
               <PageTransition>
                 {children}
               </PageTransition>
             </div>
-            {isClient && user && <div className="h-20 safe-area-bottom" />}
+            {isClient && user && !isAuthPage && <div className="h-20 safe-area-bottom" />}
           </div>
         </ErrorBoundary>
       </body>
