@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSound } from 'use-sound';
 
 interface Question {
   id: string;
@@ -14,6 +15,18 @@ interface Question {
 
 export default function SoloGamePage() {
   const router = useRouter();
+
+  // Sons para feedback
+  const [playCorrect] = useSound('/correct.mp3', { volume: 0.5 });
+  const [playWrong] = useSound('/wrong.mp3', { volume: 0.5 });
+  const [playGameOver] = useSound('/game-over.mp3', { volume: 0.5 });
+
+  // Função para vibração
+  const vibrate = (duration: number) => {
+    if (navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
+  };
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -85,6 +98,15 @@ export default function SoloGamePage() {
     const correct = answerIndex === currentQuestion.correctAnswer;
     setIsCorrect(correct);
 
+    // Feedback tátil e sonoro
+    if (correct) {
+      vibrate(100); // Vibração curta para acertos
+      playCorrect(); // Som para acerto
+    } else {
+      vibrate(500); // Vibração longa para erros
+      playWrong(); // Som para erro
+    }
+
     if (correct) {
       const timeBonus = Math.max(0, timeLeft * 10);
       const basePoints = 100;
@@ -109,6 +131,13 @@ export default function SoloGamePage() {
     setShowResult(false);
     setTimeLeft(30);
   };
+
+  // Efeito para tocar som de fim de jogo
+  useEffect(() => {
+    if (gameFinished) {
+      playGameOver();
+    }
+  }, [gameFinished, playGameOver]);
 
   if (gameFinished) {
     return (
