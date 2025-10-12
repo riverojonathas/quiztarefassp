@@ -68,20 +68,22 @@ export default function SignInPage() {
         // Check user profile and onboarding status
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
-          .select('onboarding_completed, nickname, avatar_seed')
+          .select('nickname, avatar_seed')
           .eq('user_id', data.user.id)
           .single();
+
+        console.log('Signin profile query result:', { profile, profileError });
 
         if (profileError && profileError.code !== 'PGRST116') {
           setLoginError('Erro ao verificar perfil: ' + profileError.message);
           return;
         }
 
-        // If profile doesn't exist or onboarding not completed, go to onboarding
-        if (!profile || !profile.onboarding_completed) {
+        // If profile doesn't exist, go to onboarding
+        if (!profile) {
           router.push('/onboarding');
         } else {
-          // Onboarding completed, go to home
+          // Profile exists, assume onboarding completed for now
           setUser({ id: data.user.id, name: profile.nickname || data.user.email || 'Usuário' });
           router.push('/home');
         }

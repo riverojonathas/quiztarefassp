@@ -48,13 +48,16 @@ export default function OnboardingPage() {
       // Check if user already has a complete profile
       const { data: existingUser, error: profileError } = await supabase
         .from('user_profiles')
-        .select('user_id, nickname, avatar_seed, onboarding_completed')
+        .select('user_id, nickname, avatar_seed')
         .eq('user_id', authUser.id)
         .single();
+
+      console.log('Profile query result:', { existingUser, profileError });
 
       // Handle the case where profile doesn't exist (PGRST116 error)
       if (profileError && profileError.code === 'PGRST116') {
         // Profile doesn't exist, user needs to complete onboarding
+        console.log('Profile does not exist, starting onboarding');
         setUser({ id: authUser.id, name: authUser.email || 'Usuário' });
         return;
       }
@@ -67,18 +70,12 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Profile exists - check onboarding status
-      if (existingUser.onboarding_completed) {
-        // Onboarding completed, go to home
-        setUser({
-          id: existingUser.user_id,
-          name: existingUser.nickname || authUser.email || 'Usuário'
-        });
-        router.push('/home');
-      } else {
-        // Onboarding not completed, stay here
-        setUser({ id: authUser.id, name: authUser.email || 'Usuário' });
-      }
+      // Profile exists - assume onboarding completed for existing profiles
+      setUser({
+        id: existingUser.user_id,
+        name: existingUser.nickname || authUser.email || 'Usuário'
+      });
+      router.push('/home');
     };
 
     checkAuthAndProfile();
@@ -167,8 +164,7 @@ export default function OnboardingPage() {
         .upsert({
           user_id: authUser.id, // Use auth user ID directly
           nickname: nickname.trim(),
-          avatar_seed: selectedAvatar,
-          onboarding_completed: true
+          avatar_seed: selectedAvatar
         }, {
           onConflict: 'user_id'
         })
