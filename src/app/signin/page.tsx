@@ -20,6 +20,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [loginError, setLoginError] = useState<string>('');
   const setUser = useSessionStore((state) => state.setUser);
   const router = useRouter();
 
@@ -61,13 +62,13 @@ export default function SignInPage() {
       });
 
       if (error) {
-        alert('Erro no login: ' + error.message);
+        setLoginError('Erro no login: ' + error.message);
       } else if (data.user) {
         // Login successful - let onboarding handle profile checks and redirects
         router.push('/onboarding');
       }
     } catch (error) {
-      alert('Erro inesperado: ' + error);
+      setLoginError('Erro inesperado: ' + error);
     } finally {
       setIsLoading(false);
     }
@@ -96,12 +97,14 @@ export default function SignInPage() {
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (errors.email) setErrors({ ...errors, email: undefined });
+                  if (loginError) setLoginError('');
                 }}
                 placeholder="Seu email para dicas de tarefas futuras"
-                className="h-11 text-base"
+                className={`h-11 text-base ${errors.email ? 'border-red-500' : ''}`}
                 required
+                aria-describedby={errors.email ? "email-error" : undefined}
               />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+              {errors.email && <p id="email-error" className="text-red-500 text-sm">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
@@ -112,14 +115,17 @@ export default function SignInPage() {
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (errors.password) setErrors({ ...errors, password: undefined });
+                  if (loginError) setLoginError('');
                 }}
                 placeholder="Sua senha"
-                className="h-11 text-base"
+                className={`h-11 text-base ${errors.password ? 'border-red-500' : ''}`}
                 required
+                aria-describedby={errors.password ? "password-error" : undefined}
               />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+              {errors.password && <p id="password-error" className="text-red-500 text-sm">{errors.password}</p>}
             </div>
-            <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
+            {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
+            <Button type="submit" className={`w-full h-11 text-base font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl ${isLoading ? 'animate-pulse' : ''}`} disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
