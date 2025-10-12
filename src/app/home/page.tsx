@@ -216,24 +216,19 @@ export default function HomePage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center space-x-4">
-                <div className="bg-white/20 rounded-full p-3 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="text-left flex-1">
-                  <h3 className="text-xl sm:text-2xl font-bold">Jogar Agora</h3>
-                  <p className="text-green-100 text-sm sm:text-base">Escolha seu modo de jogo e comece a competir!</p>
-                </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <div className="flex items-center justify-center space-x-4">
+              <div className="bg-white/20 rounded-full p-3 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <div className="text-center">
-                <p className="text-green-100 text-sm">🎯 Desafie-se • 🤖 Contra Bots • 👥 Multiplayer</p>
+              <div className="text-center flex-1">
+                <h3 className="text-xl sm:text-2xl font-bold">Jogar Agora</h3>
+                <p className="text-green-100 text-sm sm:text-base">Escolha seu modo</p>
               </div>
+              <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </motion.button>
         </div>
