@@ -7,6 +7,7 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Progress } from '../../components/ui/progress';
 import { LeaderboardEntry } from '../../domain/models';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
 import { motion } from 'framer-motion';
@@ -140,7 +141,7 @@ export default function HomePage() {
       {showConfetti && <Confetti />}
       <div className="container mx-auto max-w-4xl sm:max-w-5xl md:max-w-6xl lg:max-w-7xl">
         {/* Header com Avatar */}
-        <div className="text-center mb-6 sm:mb-8">
+        <div className="text-center mb-6 sm:mb-8 relative">
           <motion.img
             src={profile?.avatarSeed ? generateAvatar(profile.avatarSeed) : '/avatar-default.png'}
             alt="Avatar"
@@ -151,51 +152,114 @@ export default function HomePage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Bem-vindo, {displayName}!</h1>
           <p className="text-lg sm:text-xl text-white/80">Pronto para testar seus conhecimentos?</p>
           <p className="text-yellow-300 text-base sm:text-lg">Nível {level} - {xp} XP</p>
+
+          {/* Botão Logout */}
+          <button
+            onClick={() => {
+              useSessionStore.getState().logout();
+              router.push('/signin');
+            }}
+            className="absolute top-0 right-0 sm:right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label="Sair da conta"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
         </div>
 
-        {/* Barra de Progresso */}
-        <motion.div
-          className="w-full bg-gray-200 rounded-full h-3 sm:h-4 mb-6 sm:mb-8 mx-auto max-w-md"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div
-            className="bg-yellow-300 h-3 sm:h-4 rounded-full transition-all duration-500"
-            style={{ width: `${(xp % 100) / 100 * 100}%` }}
-          ></div>
-        </motion.div>
+        {/* Seção de Progresso e Estatísticas */}
+        <div className="space-y-6 sm:space-y-8">
+          {/* Barra de Progresso */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-white text-lg sm:text-xl flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Seu Progresso</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm text-white/80">
+                  <span>Nível {level}</span>
+                  <span>{(xp % 100)}%</span>
+                </div>
+                <Progress value={(xp % 100)} className="h-3 bg-white/20" />
+                <p className="text-white/60 text-sm">
+                  {100 - (xp % 100)}% para o próximo nível
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Streak */}
-        <div className="text-center mb-4 sm:mb-6">
-          <p className="text-white text-base sm:text-lg">Streak: {streak} dias 🔥</p>
-          {streak < 7 && <p className="text-red-300 text-sm sm:text-base">Jogue hoje para não perder o streak!</p>}
+          {/* Estatísticas Rápidas */}
+          <div className="grid grid-cols-2 gap-4 sm:gap-6">
+            {/* Streak */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-orange-400 mb-2">
+                  🔥 {streak}
+                </div>
+                <p className="text-white/80 text-sm sm:text-base">Dias de streak</p>
+              </CardContent>
+            </Card>
+
+            {/* Badges */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-purple-400 mb-2">
+                  🏆 {badges.length}
+                </div>
+                <p className="text-white/80 text-sm sm:text-base">Conquistas</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recomendações */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-white text-lg sm:text-xl flex items-center space-x-2">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Dicas para Melhorar</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-blue-500/20 rounded-full p-2 mt-0.5">
+                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white/90 text-sm sm:text-base font-medium">Mantenha o streak!</p>
+                    <p className="text-white/60 text-xs sm:text-sm">Jogue todos os dias para ganhar bônus</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="bg-green-500/20 rounded-full p-2 mt-0.5">
+                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white/90 text-sm sm:text-base font-medium">Complete desafios</p>
+                    <p className="text-white/60 text-xs sm:text-sm">Ganhe badges e suba no ranking</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Badges */}
-        <div className="text-center mb-6 sm:mb-8">
-          <Button onClick={() => setShowBadges(!showBadges)} className="bg-purple-500 hover:bg-purple-600 text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3">
-            Ver Badges
-          </Button>
-          {showBadges && (
-            <motion.div
-              className="mt-3 sm:mt-4 bg-white p-3 sm:p-4 rounded-lg shadow-lg max-w-md mx-auto"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {badges.length > 0 ? badges.map(badge => <p key={badge} className="text-gray-800 text-sm sm:text-base">{badge}</p>) : <p className="text-sm sm:text-base">Nenhum badge ainda</p>}
-            </motion.div>
-          )}
-        </div>
-
-        {/* Recomendações */}
-        <div className="text-center mb-6 sm:mb-8">
-          <p className="text-white text-sm sm:text-base">Recomendação: Continue de onde parou - Quiz de Matemática</p>
-        </div>
-
+        {/* Seção Principal - Jogar e Ranking */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Ranking Card */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 lg:col-span-1 w-full">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 lg:col-span-1 w-full order-2 lg:order-1">
             <CardHeader className="pb-2 sm:pb-4">
               <CardTitle className="text-white text-lg sm:text-xl">Sua Posição</CardTitle>
             </CardHeader>
@@ -209,10 +273,10 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Play Now Button - Transformed into main CTA */}
+          {/* Play Now Button - CTA Principal */}
           <motion.button
             onClick={() => router.push('/play')}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 group lg:col-span-2 w-full"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 group lg:col-span-2 w-full order-1 lg:order-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -224,6 +288,7 @@ export default function HomePage() {
               </div>
               <div className="text-center flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold">Jogar Agora</h3>
+                <p className="text-green-100 text-sm sm:text-base">Teste seus conhecimentos</p>
               </div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -232,7 +297,7 @@ export default function HomePage() {
           </motion.button>
         </div>
 
-        {/* Additional Action Buttons */}
+        {/* Botões Secundários */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Ranking Button */}
           <motion.button
@@ -249,6 +314,7 @@ export default function HomePage() {
               </div>
               <div className="text-center flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold">Ver Ranking</h3>
+                <p className="text-blue-100 text-sm sm:text-base">Complete leaderboard</p>
               </div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -272,6 +338,7 @@ export default function HomePage() {
               </div>
               <div className="text-center flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold">Configurações</h3>
+                <p className="text-purple-100 text-sm sm:text-base">Personalizar app</p>
               </div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -280,48 +347,24 @@ export default function HomePage() {
           </motion.button>
         </div>
 
-        {/* Top Players */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 mb-8">
-          <CardHeader>
-            <CardTitle className="text-white">Top Jogadores</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-white/80">Carregando ranking...</p>
-            ) : leaderboard.length > 0 ? (
-              <div className="space-y-2">
-                {leaderboard.slice(0, 5).map((entry, index) => (
-                  <motion.div
-                    key={`${entry.userId}-${index}`}
-                    className="flex justify-between items-center text-white"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    onHoverStart={() => playHover()}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="font-bold text-yellow-300">#{index + 1}</span>
-                      <span>Jogador {entry.userId.slice(0, 8)}</span>
-                    </span>
-                    <span className="font-bold">{entry.score} pts</span>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-white/80">Nenhum jogo registrado ainda.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 gap-3 sm:gap-4">
-          <Button
+        {/* Ver Ranking Completo */}
+        <div className="mt-6 sm:mt-8">
+          <motion.button
             onClick={() => router.push('/ranking')}
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 py-3 sm:py-4 text-sm sm:text-base"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-4 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            Ver Ranking Completo
-          </Button>
+            <div className="flex items-center justify-center space-x-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              <span className="text-lg sm:text-xl font-bold">Ver Ranking Completo</span>
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </motion.button>
         </div>
       </div>
     </motion.div>

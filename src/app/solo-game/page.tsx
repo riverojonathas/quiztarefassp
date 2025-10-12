@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 interface Question {
   id: string;
@@ -63,6 +64,7 @@ export default function SoloGamePage() {
   const [gameFinished, setGameFinished] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [shakeAnimation, setShakeAnimation] = useState<'correct' | 'wrong' | null>(null);
 
   // Mock questions for solo play
   const mockQuestions: Question[] = [
@@ -125,6 +127,9 @@ export default function SoloGamePage() {
     const correct = answerIndex === currentQuestion.correctAnswer;
     setIsCorrect(correct);
 
+    // Definir tipo de animação de tremor
+    setShakeAnimation(correct ? 'correct' : 'wrong');
+
     // Feedback tátil e sonoro
     if (correct) {
       vibrate(100); // Vibração curta para acertos
@@ -141,6 +146,11 @@ export default function SoloGamePage() {
     }
 
     setShowResult(true);
+
+    // Resetar animação após 1 segundo
+    setTimeout(() => {
+      setShakeAnimation(null);
+    }, 1000);
 
     setTimeout(() => {
       setQuestionNumber(prev => prev + 1);
@@ -209,45 +219,30 @@ export default function SoloGamePage() {
 
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
-        <main className="pt-20 px-4 pb-24">
-          <div className="max-w-md mx-auto text-center">
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <div className="text-6xl mb-4">🎯</div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Modo Treino
-              </h1>
-              <p className="text-gray-600 mb-6">
-                Pratique suas habilidades respondendo perguntas cronometradas
-              </p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 py-8">
+        <main className="w-full max-w-md">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 text-center">
+              Você está pronto?
+            </h1>
+            <p className="text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg text-center">
+              Teste seus conhecimentos agora
+            </p>
 
-              <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <div className="text-sm text-blue-700">
-                  <div className="font-semibold mb-2">Como funciona:</div>
-                  <ul className="text-left space-y-1">
-                    <li>• 3 perguntas de prática</li>
-                    <li>• Tempo limitado por pergunta</li>
-                    <li>• Pontuação baseada na velocidade</li>
-                    <li>• Sem pressão competitiva</li>
-                  </ul>
-                </div>
-              </div>
+            <div className="space-y-3 sm:space-y-4">
+              <button
+                onClick={startGame}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl py-4 sm:py-5 font-bold text-lg sm:text-xl hover:shadow-lg active:scale-95 transition-all duration-300 shadow-green-200"
+              >
+                🚀 START
+              </button>
 
-              <div className="space-y-3">
-                <button
-                  onClick={startGame}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl py-4 font-semibold text-lg hover:shadow-lg active:scale-95 transition-all duration-300"
-                >
-                  Começar Treino
-                </button>
-
-                <button
-                  onClick={() => router.push('/play')}
-                  className="w-full bg-gray-200 text-gray-700 rounded-xl py-3 font-semibold hover:bg-gray-300 active:scale-95 transition-all duration-300"
-                >
-                  Voltar
-                </button>
-              </div>
+              <button
+                onClick={() => router.push('/home')}
+                className="w-full bg-gray-200 text-gray-700 rounded-xl py-3 font-semibold hover:bg-gray-300 active:scale-95 transition-all duration-300"
+              >
+                Sair
+              </button>
             </div>
           </div>
         </main>
@@ -256,11 +251,11 @@ export default function SoloGamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
-      <main className="pt-20 px-4 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-4">
+      <main className="pt-8 sm:pt-12 px-4 pb-4">
         <div className="max-w-md mx-auto">
           {/* Header do jogo */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-600">
               Pergunta {questionNumber}/3
             </div>
@@ -270,7 +265,7 @@ export default function SoloGamePage() {
           </div>
 
           {/* Timer */}
-          <div className="mb-6">
+          <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-gray-700">Tempo</span>
               <span className={`text-lg font-bold ${timeLeft <= 5 ? 'text-red-500' : 'text-gray-900'}`}>
@@ -289,24 +284,33 @@ export default function SoloGamePage() {
 
           {/* Questão */}
           {currentQuestion && (
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
-              <div className="flex items-center mb-4">
+            <motion.div
+              className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg mb-4"
+              animate={shakeAnimation === 'correct' ? {
+                x: [0, -5, 5, -5, 5, 0],
+                transition: { duration: 0.5, ease: "easeInOut" }
+              } : shakeAnimation === 'wrong' ? {
+                x: [0, -10, 10, -10, 10, -5, 5, 0],
+                transition: { duration: 0.8, ease: "easeInOut" }
+              } : {}}
+            >
+              <div className="flex items-center mb-3">
                 <span className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
                   {currentQuestion.skill}
                 </span>
               </div>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-6 leading-relaxed">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
                 {currentQuestion.statement}
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {currentQuestion.choices.map((choice, index) => (
                   <button
                     key={index}
                     onClick={() => handleAnswer(index)}
                     disabled={showResult}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 ${
+                    className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ${
                       showResult
                         ? index === currentQuestion.correctAnswer
                           ? 'bg-green-100 border-green-500 text-green-800'
@@ -339,22 +343,22 @@ export default function SoloGamePage() {
                   </button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Resultado temporário */}
           {showResult && (
-            <div className={`text-center p-4 rounded-xl mb-4 ${
+            <div className={`text-center p-3 rounded-xl mb-3 ${
               isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
-              <div className="text-2xl mb-2">
+              <div className="text-xl mb-1">
                 {isCorrect ? '🎉' : '😞'}
               </div>
-              <div className="font-semibold">
+              <div className="font-semibold text-sm">
                 {isCorrect ? 'Correto!' : 'Incorreto'}
               </div>
               {isCorrect && (
-                <div className="text-sm mt-1">
+                <div className="text-xs mt-1">
                   +{100 + Math.max(0, timeLeft * 10)} pontos
                 </div>
               )}
@@ -362,7 +366,7 @@ export default function SoloGamePage() {
           )}
 
           {/* Botão sair */}
-          <div className="text-center">
+          <div className="text-center mt-2">
             <button
               onClick={() => router.push('/play')}
               className="text-gray-500 hover:text-gray-700 transition-colors duration-300 text-sm"
