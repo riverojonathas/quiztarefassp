@@ -7,7 +7,7 @@ interface SessionState {
   lastScore: number | null;
   setUser: (user: User) => void;
   setLastScore: (score: number) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -17,7 +17,18 @@ export const useSessionStore = create<SessionState>()(
       lastScore: null,
       setUser: (user) => set({ user }),
       setLastScore: (score) => set({ lastScore: score }),
-      logout: () => set({ user: null, lastScore: null }),
+      logout: async () => {
+        try {
+          // Import supabase dynamically to avoid circular dependencies
+          const { supabase } = await import('../lib/supabase');
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error('Error signing out from Supabase:', error);
+        } finally {
+          // Always clear local state
+          set({ user: null, lastScore: null });
+        }
+      },
     }),
     {
       name: 'quiz-session-storage',

@@ -329,8 +329,8 @@ export default function HomePage() {
 
             {/* Logout Button */}
             <motion.button
-              onClick={() => {
-                useSessionStore.getState().logout();
+              onClick={async () => {
+                await useSessionStore.getState().logout();
                 router.push('/signin');
               }}
               className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl p-4 shadow-lg hover:bg-white/20 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group w-full"
