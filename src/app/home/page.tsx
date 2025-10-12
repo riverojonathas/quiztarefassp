@@ -224,7 +224,6 @@ export default function HomePage() {
               </div>
               <div className="text-center flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold">Jogar Agora</h3>
-                <p className="text-green-100 text-sm sm:text-base">Escolha seu modo</p>
               </div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
