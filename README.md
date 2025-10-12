@@ -54,6 +54,17 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - ✅ **Push Notifications**: Web Push API para engajamento
 - ✅ **Deploy Automático**: Zero-downtime deployments
 
+### Próximas Expansões (Roadmap Detalhado)
+Para evoluir o app para um sistema educacional completo, consulte o [`roadmap.md`](roadmap.md) para detalhes sobre:
+- Módulo Professor
+- Sistema de Fases Configuráveis
+- Relacionamentos Educacionais (série, escola, turma, diretoria)
+- Metas e Progresso para Alunos
+- Tematização Dinâmica (temas comemorativos)
+- Front-end para Cadastro de Questões
+- Jogos Configuráveis e Múltiplas Modalidades
+- Itens inacabados (ex.: integração solo game com Supabase)
+
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
