@@ -65,8 +65,26 @@ export default function SignInPage() {
       if (error) {
         setLoginError('Erro no login: ' + error.message);
       } else if (data.user) {
-        // Login successful - let onboarding handle profile checks and redirects
-        router.push('/onboarding');
+        // Check user profile and onboarding status
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed, nickname, avatar_seed')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          setLoginError('Erro ao verificar perfil: ' + profileError.message);
+          return;
+        }
+
+        // If profile doesn't exist or onboarding not completed, go to onboarding
+        if (!profile || !profile.onboarding_completed) {
+          router.push('/onboarding');
+        } else {
+          // Onboarding completed, go to home
+          setUser({ id: data.user.id, name: profile.nickname || data.user.email || 'Usuário' });
+          router.push('/home');
+        }
       }
     } catch (error) {
       setLoginError('Erro inesperado: ' + error);
