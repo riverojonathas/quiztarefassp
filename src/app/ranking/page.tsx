@@ -95,7 +95,7 @@ export default function RankingPage() {
         <div className="bg-white rounded-xl border shadow-sm p-4 sm:p-6">
           <div className="space-y-3 sm:space-y-4">
             <Link
-              href="/lobby"
+              href="/play"
               className="w-full block text-center px-4 sm:px-6 py-3 sm:py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base"
             >
               🎯 Continuar Jogando

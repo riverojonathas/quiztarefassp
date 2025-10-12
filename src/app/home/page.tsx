@@ -314,20 +314,13 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           <Button
             onClick={() => router.push('/ranking')}
             variant="outline"
             className="bg-white/10 border-white/20 text-white hover:bg-white/20 py-3 sm:py-4 text-sm sm:text-base"
           >
             Ver Ranking Completo
-          </Button>
-          <Button
-            onClick={() => router.push('/lobby')}
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 py-3 sm:py-4 text-sm sm:text-base"
-          >
-            Criar/Entrar Sala
           </Button>
         </div>
 
@@ -378,18 +371,6 @@ export default function HomePage() {
                 </div>
               </button>
             </div>
-
-            {/* Rooms Button */}
-            <button
-              onClick={() => router.push('/rooms')}
-              className="flex flex-col items-center p-2 rounded-lg transition-all duration-300 hover:bg-white/20"
-              aria-label="Salas"
-            >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span className="text-xs font-medium mt-1 text-gray-700">Salas</span>
-            </button>
 
             {/* Settings Button */}
             <button

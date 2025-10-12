@@ -37,7 +37,6 @@ export function Header() {
     { href: '/home', icon: 'Home', label: 'Home', description: 'Página inicial' },
     { href: '/ranking', icon: 'Trophy', label: 'Ranking', description: 'Ver classificações' },
     { href: '/play', icon: 'Play', label: 'Jogar', description: 'Escolher modo de jogo' },
-    { href: '/rooms', icon: 'Users', label: 'Salas', description: 'Criar/Acessar salas' },
     { href: '/settings', icon: 'Settings', label: 'Config', description: 'Configurações' },
   ];
 

@@ -228,8 +228,6 @@ npm run dev
 
 4. **▶️ Jogar**: Escolha entre "Jogar sozinho" ou "Jogar contra outro"
 
-5. **👥 Salas**: Crie uma sala ou entre com código (ex.: `AB12`)
-
 6. **🎯 Sala**: Jogue perguntas, veja timer e placar### Sprint 3 ✅ - Infraestrutura de Produção- **Web Push API**: Notificações nativas no navegador
 
 
@@ -259,8 +257,6 @@ npm run dev
 │   ├── play/                    # Game mode selection page
 
 │   ├── solo-game/               # Solo practice game page## 🛠️ Stack Tecnológico
-
-│   ├── rooms/                   # Rooms management (renamed from lobby)
 
 │   └── globals.css              # Global styles- **🔐 Autenticação**: Login/cadastro com email + Google OAuth
 
@@ -1007,42 +1003,7 @@ Atualmente testamos:
 
 ### Estrutura de Testes
 
-3. **🎪 Lobby**
-
-   - Crie uma sala nova```
-
-   - Entre com código (ex: `AB12`)/src
-
-   - Configure modo de jogo  /components/ui/Button.test.tsx
-
-  /state/useSessionStore.test.ts
-
-4. **🎯 Sala de Quiz**  /domain/models.test.ts
-
-   - Aguarde outros jogadores```
-
-   - Chat em tempo real disponível
-
-   - Host controla o inícioOs testes seguem as melhores práticas:
-
-- Testes unitários isolados
-
-5. **⏱️ Durante o Jogo**- Uso de `renderHook` para hooks
-
-   - Perguntas cronometradas- Validação de props e estados
-
-   - Feedback instantâneo- Testes de interação do usuário
-
-   - Placar atualizado em tempo real
-
-## Licença
-
-6. **🏆 Resultados**
-
-   - Pódio com animaçõesEste é um projeto de demonstração.
-
-   - Estatísticas detalhadas
-   - Ranking atualizado
+3. **▶️ Jogar**- Escolha "Jogar sozinho" para prática
 
 ## 🔧 Configurações de Produção
 
