@@ -152,27 +152,13 @@ export default function HomePage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Bem-vindo, {displayName}!</h1>
           <p className="text-lg sm:text-xl text-white/80">Pronto para testar seus conhecimentos?</p>
           <p className="text-yellow-300 text-base sm:text-lg">Nível {level} - {xp} XP</p>
-
-          {/* Botão Logout */}
-          <button
-            onClick={() => {
-              useSessionStore.getState().logout();
-              router.push('/signin');
-            }}
-            className="absolute top-0 right-0 sm:right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50"
-            aria-label="Sair da conta"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
         </div>
 
         {/* Seção de Progresso e Estatísticas */}
-        <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-6 sm:space-y-8 mb-6 sm:mb-8">
           {/* Barra de Progresso */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader className="pb-3 sm:pb-4">
+            <CardHeader className="pb-2 sm:pb-3">
               <CardTitle className="text-white text-lg sm:text-xl flex items-center space-x-2">
                 <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -190,6 +176,14 @@ export default function HomePage() {
                 <p className="text-white/60 text-sm">
                   {100 - (xp % 100)}% para o próximo nível
                 </p>
+                <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                  <div className="text-center flex-1">
+                    <div className="text-2xl sm:text-3xl font-bold text-yellow-300">
+                      {isLoading ? '...' : userRank ? `#${userRank}` : 'N/A'}
+                    </div>
+                    <p className="text-white/80 text-xs sm:text-sm">Posição no ranking</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -219,7 +213,7 @@ export default function HomePage() {
 
           {/* Recomendações */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader className="pb-3 sm:pb-4">
+            <CardHeader className="pb-2 sm:pb-3">
               <CardTitle className="text-white text-lg sm:text-xl flex items-center space-x-2">
                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -256,27 +250,12 @@ export default function HomePage() {
           </Card>
         </div>
 
-        {/* Seção Principal - Jogar e Ranking */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Ranking Card */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 lg:col-span-1 w-full order-2 lg:order-1">
-            <CardHeader className="pb-2 sm:pb-4">
-              <CardTitle className="text-white text-lg sm:text-xl">Sua Posição</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-center">
-                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-yellow-300 mb-2">
-                  {isLoading ? '...' : userRank ? `#${userRank}` : 'N/A'}
-                </div>
-                <p className="text-white/80 text-sm sm:text-base">no ranking geral</p>
-              </div>
-            </CardContent>
-          </Card>
-
+        {/* Seção Principal - Jogar */}
+        <div className="mb-6 sm:mb-8">
           {/* Play Now Button - CTA Principal */}
           <motion.button
             onClick={() => router.push('/play')}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 group lg:col-span-2 w-full order-1 lg:order-2"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 group w-full"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -298,7 +277,7 @@ export default function HomePage() {
         </div>
 
         {/* Botões Secundários */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Ranking Button */}
           <motion.button
             onClick={() => router.push('/ranking')}
@@ -325,47 +304,56 @@ export default function HomePage() {
           {/* Settings Button */}
           <motion.button
             onClick={() => router.push('/settings')}
-            className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300 group w-full"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl p-4 shadow-lg hover:bg-white/20 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group w-full"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
-            <div className="flex items-center justify-center space-x-4">
-              <div className="bg-white/20 rounded-full p-3 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="bg-white/20 rounded-full p-2 group-hover:scale-105 transition-transform duration-300">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <div className="text-center flex-1">
-                <h3 className="text-xl sm:text-2xl font-bold">Configurações</h3>
-                <p className="text-purple-100 text-sm sm:text-base">Personalizar app</p>
+                <h3 className="text-base sm:text-lg font-medium">Configurações</h3>
+                <p className="text-white/60 text-xs sm:text-sm">Personalizar app</p>
               </div>
-              <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
           </motion.button>
         </div>
 
-        {/* Ver Ranking Completo */}
+        {/* Botão Logout - Final da Página */}
         <div className="mt-6 sm:mt-8">
           <motion.button
-            onClick={() => router.push('/ranking')}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-4 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 group"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="flex items-center justify-center space-x-3">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-              <span className="text-lg sm:text-xl font-bold">Ver Ranking Completo</span>
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          onClick={() => {
+            useSessionStore.getState().logout();
+            router.push('/signin');
+          }}
+          className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl p-4 shadow-lg hover:bg-white/20 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group w-full"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+        >
+          <div className="flex items-center justify-center space-x-3">
+            <div className="bg-white/20 rounded-full p-2 group-hover:scale-105 transition-transform duration-300">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </div>
-          </motion.button>
+            <div className="text-center flex-1">
+              <h3 className="text-base sm:text-lg font-medium">Sair da Conta</h3>
+              <p className="text-white/60 text-xs sm:text-sm">Encerrar sessão</p>
+            </div>
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </motion.button>
         </div>
+
       </div>
     </motion.div>
   );
