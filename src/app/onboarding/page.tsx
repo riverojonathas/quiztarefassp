@@ -48,7 +48,7 @@ export default function OnboardingPage() {
       // Check if user already has a complete profile
       const { data: existingUser, error: profileError } = await supabase
         .from('user_profiles')
-        .select('user_id, nickname, avatar_seed')
+        .select('user_id, nickname, avatar_seed, onboarding_completed')
         .eq('user_id', authUser.id)
         .single();
 
@@ -70,12 +70,18 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Profile exists - assume onboarding completed for existing profiles
-      setUser({
-        id: existingUser.user_id,
-        name: existingUser.nickname || authUser.email || 'Usuário'
-      });
-      router.push('/home');
+      // Profile exists - check onboarding status
+      if (existingUser.onboarding_completed) {
+        // Onboarding completed, go to home
+        setUser({
+          id: existingUser.user_id,
+          name: existingUser.nickname || authUser.email || 'Usuário'
+        });
+        router.push('/home');
+      } else {
+        // Onboarding not completed, stay here
+        setUser({ id: authUser.id, name: authUser.email || 'Usuário' });
+      }
     };
 
     checkAuthAndProfile();
@@ -164,7 +170,8 @@ export default function OnboardingPage() {
         .upsert({
           user_id: authUser.id, // Use auth user ID directly
           nickname: nickname.trim(),
-          avatar_seed: selectedAvatar
+          avatar_seed: selectedAvatar,
+          onboarding_completed: true
         }, {
           onConflict: 'user_id'
         })

@@ -68,7 +68,7 @@ export default function SignInPage() {
         // Check user profile and onboarding status
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
-          .select('nickname, avatar_seed')
+          .select('onboarding_completed, nickname, avatar_seed')
           .eq('user_id', data.user.id)
           .single();
 
@@ -79,11 +79,11 @@ export default function SignInPage() {
           return;
         }
 
-        // If profile doesn't exist, go to onboarding
-        if (!profile) {
+        // If profile doesn't exist or onboarding not completed, go to onboarding
+        if (!profile || !profile.onboarding_completed) {
           router.push('/onboarding');
         } else {
-          // Profile exists, assume onboarding completed for now
+          // Onboarding completed, go to home
           setUser({ id: data.user.id, name: profile.nickname || data.user.email || 'Usuário' });
           router.push('/home');
         }
