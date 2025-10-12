@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSound } from 'use-sound';
 
 interface Question {
   id: string;
@@ -16,10 +15,38 @@ interface Question {
 export default function SoloGamePage() {
   const router = useRouter();
 
-  // Sons para feedback
-  const [playCorrect] = useSound('/correct.mp3', { volume: 0.5 });
-  const [playWrong] = useSound('/wrong.mp3', { volume: 0.5 });
-  const [playGameOver] = useSound('/game-over.mp3', { volume: 0.5 });
+  // Funções para gerar sons usando Web Audio API
+  const playSound = (frequency: number, duration: number, type: OscillatorType = 'sine') => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (error) {
+      console.warn('Web Audio API not supported:', error);
+    }
+  };
+
+  const playCorrectSound = () => playSound(800, 0.2, 'sine'); // Tom agudo curto
+  const playWrongSound = () => playSound(300, 0.5, 'sawtooth'); // Tom grave longo
+  const playGameOverSound = () => {
+    // Sequência de notas para fim de jogo
+    setTimeout(() => playSound(523, 0.2), 0);   // C
+    setTimeout(() => playSound(659, 0.2), 200); // E
+    setTimeout(() => playSound(784, 0.4), 400); // G
+  };
 
   // Função para vibração
   const vibrate = (duration: number) => {
@@ -101,10 +128,10 @@ export default function SoloGamePage() {
     // Feedback tátil e sonoro
     if (correct) {
       vibrate(100); // Vibração curta para acertos
-      playCorrect(); // Som para acerto
+      playCorrectSound(); // Som para acerto
     } else {
       vibrate(500); // Vibração longa para erros
-      playWrong(); // Som para erro
+      playWrongSound(); // Som para erro
     }
 
     if (correct) {
@@ -135,9 +162,9 @@ export default function SoloGamePage() {
   // Efeito para tocar som de fim de jogo
   useEffect(() => {
     if (gameFinished) {
-      playGameOver();
+      playGameOverSound();
     }
-  }, [gameFinished, playGameOver]);
+  }, [gameFinished]);
 
   if (gameFinished) {
     return (
