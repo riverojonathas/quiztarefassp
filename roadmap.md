@@ -12,11 +12,19 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 ### 🎯 Navegação Reorganizada
 - **🏠 Home**: Página inicial com estatísticas pessoais e ranking consolidado
 - **🏆 Ranking**: Ver classificações globais
-- **▶️ Jogar**: Escolha entre "Jogar sozinho" ou "Jogar contra outro"
+- **▶️ Jogar**: Escolha entre 3 modos: "Jogar sozinho", "Trilha de Tarefas" ou "Tarefas em Grupo"
+- **📚 Trilha de Tarefas**: Sistema de progressão educacional com fases
+- **👥 Tarefas em Grupo**: Aprendizado colaborativo (em desenvolvimento)
 
 ## 📋 Roadmap e Funcionalidades Futuras
 
 Este documento descreve as expansões planejadas para o app, organizadas em passos incrementais. O foco é evoluir de um MVP básico para um sistema educacional completo, com ênfase em configuração, modalidades e colaboração.
+
+### ✅ **Implementado Recentemente**
+- **Layout Mobile Otimizado**: Reorganização da página `/play` com texto no topo, botões centralizados e botão inferior fixo (sem scroll)
+- **Página Trilha de Tarefas**: Sistema de 6 fases educacionais com cards visuais e status "Em breve"
+- **Página Tarefas em Grupo**: Explicação das modalidades colaborativas com banner "Em desenvolvimento"
+- **Texto Renovado**: "Escolha seu Modo de Jogo" para melhor comunicação educacional
 
 ### 1. **Front-end para Cadastro de Questões**
    - **Objetivo**: Permitir que usuários (professores/admin) cadastrem, editem e excluam questões diretamente no app.

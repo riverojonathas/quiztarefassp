@@ -12,13 +12,17 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 ### 🎯 Navegação Reorganizada
 - **🏠 Home**: Página inicial com estatísticas pessoais e ranking consolidado
 - **🏆 Ranking**: Ver classificações globais
-- **▶️ Jogar**: Escolha entre "Jogar sozinho" ou "Jogar contra outro"
+- **▶️ Jogar**: Escolha entre 3 modos: "Jogar sozinho", "Trilha de Tarefas" ou "Tarefas em Grupo"
+- **📚 Trilha de Tarefas**: Sistema de progressão educacional com fases
+- **👥 Tarefas em Grupo**: Aprendizado colaborativo (em desenvolvimento)
 - **👥 Salas**: Criar/acessar salas de jogo multiplayer
 - **⚙️ Configurações**: Personalizar app e sair da conta
 
 ### 🎮 Modos de Jogo
 - **🎯 Jogar Sozinho**: Prática individual com 3 perguntas cronometradas
-- **👥 Jogar contra outro**: Multiplayer em tempo real via salas
+- **� Trilha de Tarefas**: Sistema de progressão com fases educacionais (6 fases disponíveis)
+- **👥 Tarefas em Grupo**: Aprendizado colaborativo em sala de aula (em desenvolvimento)
+- **�👥 Jogar contra outro**: Multiplayer em tempo real via salas
 - **🏠 Sistema de Salas**: Criação/entrada por código curto
 - **⏱️ Quiz Cronometrado**: Perguntas objetivas com feedback instantâneo
 - **📊 Ranking Global**: Placar da sala e ranking geral
@@ -126,8 +130,10 @@ src/
 │   │   └── test-connection/     # Supabase connection test
 │   ├── home/                    # Home page with consolidated ranking
 │   ├── ranking/                 # Global ranking page
-│   ├── play/                    # Game mode selection page
+│   ├── play/                    # Seleção de modos de jogo (layout mobile otimizado)
 │   ├── solo-game/               # Solo practice game page
+│   ├── trilha-tarefas/          # Sistema de progressão educacional
+│   ├── tarefas-grupo/           # Aprendizado colaborativo (em desenvolvimento)
 │   ├── settings/                # User settings page
 │   ├── signin|signup/           # Auth pages
 │   └── globals.css              # Global styles
