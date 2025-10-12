@@ -1,7 +1,7 @@
 -- Add user_profiles table to store additional user settings
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   avatar_seed TEXT, -- Seed for DiceBear avatar generation
   avatar_url TEXT, -- Optional custom avatar URL
   nickname TEXT, -- Custom nickname override
@@ -17,6 +17,22 @@ CREATE TABLE user_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id)
 );
+
+-- Enable Row Level Security
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for user_profiles
+CREATE POLICY "Users can view their own profile" ON user_profiles
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own profile" ON user_profiles
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own profile" ON user_profiles
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own profile" ON user_profiles
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Create index for faster lookups
 CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);

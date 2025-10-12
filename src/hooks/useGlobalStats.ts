@@ -25,7 +25,7 @@ export function useGlobalStats() {
 
         // Buscar total de usuários
         const { count: usersCount, error: usersError } = await supabase
-          .from('users')
+          .from('user_profiles')
           .select('*', { count: 'exact', head: true });
 
         if (usersError) throw usersError;

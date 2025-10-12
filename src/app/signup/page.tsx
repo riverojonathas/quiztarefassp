@@ -8,14 +8,19 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { z } from 'zod';
+
+const signupSchema = z.object({
+  email: z.string().email('Email inválido – precisamos de um endereço real para missões futuras!'),
+  password: z.string().min(1, 'Sua senha precisa ser forte para proteger seus pontos!'),
+});
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const setUser = useSessionStore((state) => state.setUser);
   const router = useRouter();
 
@@ -24,55 +29,44 @@ export default function SignUpPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Get user from our users table
+        // Get user from our user_profiles table
         const { data: existingUser } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
+          .from('user_profiles')
+          .select('user_id, nickname')
+          .eq('user_id', user.id)
           .single();
 
         if (existingUser) {
-          setUser({ id: existingUser.id, name: existingUser.username });
+          setUser({ id: existingUser.user_id, name: existingUser.nickname || user.email || 'Usuário' });
           router.push('/home');
+        } else {
+          // User logged in but no profile - redirect to onboarding
+          router.push('/onboarding');
         }
       }
     };
 
     checkUser();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        const user = session.user;
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (existingUser) {
-          setUser({ id: existingUser.id, name: existingUser.username });
-          router.push('/home');
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Remove automatic auth state listener - we'll handle redirects manually
   }, [setUser, router]);
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert('As senhas não coincidem');
+    // Validate form
+    const result = signupSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0] === 'email') fieldErrors.email = issue.message;
+        if (issue.path[0] === 'password') fieldErrors.password = issue.message;
+      });
+      setErrors(fieldErrors);
       return;
     }
 
-    if (password.length < 6) {
-      alert('A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
+    setErrors({});
     setIsLoading(true);
 
     try {
@@ -88,10 +82,31 @@ export default function SignUpPage() {
 
       if (error) {
         alert('Erro no cadastro: ' + error.message);
-      } else if (data.user) {
-        // User created successfully, they can now sign in
-        alert('Conta criada com sucesso! Você pode fazer login agora.');
-        router.push('/signin');
+        return;
+      }
+
+      if (data.user) {
+        // Check if user is already confirmed (email confirmation disabled)
+        if (data.user.email_confirmed_at) {
+          // User is confirmed, try auto-login
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (loginError) {
+            alert('Conta criada, mas erro no login automático: ' + loginError.message);
+            router.push('/signin');
+          } else {
+            // Auto-login successful - set user in store and redirect to onboarding
+            setUser({ id: loginData.user.id, name: loginData.user.email || 'Usuário' });
+            router.push('/onboarding');
+          }
+        } else {
+          // User needs email confirmation
+          alert('Conta criada! Verifique seu email para confirmar a conta antes de fazer login.');
+          router.push('/signin');
+        }
       }
     } catch (error) {
       alert('Erro inesperado: ' + error);
@@ -100,32 +115,26 @@ export default function SignUpPage() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    setIsGoogleLoading(true);
-
-    try {
-      const { data: _data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/home`
-        }
-      });
-
-      if (error) {
-        alert('Erro no cadastro com Google: ' + error.message);
-      }
-    } catch (error) {
-      alert('Erro inesperado: ' + error);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-8 sm:px-6 lg:px-8">
       <Card className="w-full max-w-sm sm:max-w-md mx-auto">
         <CardHeader className="pb-4">
+          <h1 className="text-center text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Tarefas do Futuro
+          </h1>
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Construa seu futuro com tarefas inteligentes!
+          </p>
           <CardTitle className="text-center text-xl sm:text-2xl">Criar Conta</CardTitle>
+          {/* Progress Bar */}
+          <div className="mt-4">
+            <div className="flex justify-between text-xs text-gray-500 mb-1">
+              <span>Passo 1 de 2: Crie sua conta</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: '100%' }}></div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4 px-4 sm:px-6">
           <form onSubmit={handleEmailSignUp} className="space-y-4">
@@ -145,11 +154,15 @@ export default function SignUpPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors({ ...errors, email: undefined });
+                }}
+                placeholder="Seu email para dicas de tarefas futuras"
                 className="h-11 text-base"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
@@ -157,46 +170,20 @@ export default function SignUpPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({ ...errors, password: undefined });
+                }}
+                placeholder="Crie uma senha forte para proteger seus pontos!"
                 className="h-11 text-base"
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmar Senha</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Digite a senha novamente"
-                className="h-11 text-base"
-                required
-              />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
             </div>
             <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
               {isLoading ? 'Criando conta...' : 'Criar Conta'}
             </Button>
           </form>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-gray-800 px-3 text-gray-500 dark:text-gray-400">Ou</span>
-            </div>
-          </div>
-
-          <Button
-            onClick={handleGoogleSignUp}
-            variant="outline"
-            className="w-full h-11 text-base font-medium border-2"
-            disabled={isGoogleLoading}
-          >
-            {isGoogleLoading ? 'Conectando...' : 'Continuar com Google'}
-          </Button>
 
           <div className="text-center text-sm pt-2">
             <span className="text-gray-600 dark:text-gray-400">Já tem conta? </span>

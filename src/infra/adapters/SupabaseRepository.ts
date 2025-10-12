@@ -6,19 +6,19 @@ export class SupabaseRepository implements UserRepository, UserProfileRepository
   // UserRepository
   async getUser(id: UserId): Promise<User | null> {
     const { data, error } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
-      .eq('id', id)
+      .eq('user_id', id)
       .single();
 
     if (error) return null;
-    return { id: data.id, name: data.username } as User;
+    return { id: data.user_id, name: data.nickname } as User;
   }
 
   async createUser(user: User): Promise<void> {
     const { error } = await supabase
-      .from('users')
-      .insert({ id: user.id, username: user.name });
+      .from('user_profiles')
+      .insert({ user_id: user.id, nickname: user.name });
 
     if (error) throw error;
   }

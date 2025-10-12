@@ -9,6 +9,65 @@ export function useUserProfile(userId: UserId | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const refreshProfile = async () => {
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      console.log('useUserProfile: Refreshing profile for user:', userId);
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('useUserProfile: Supabase error:', error);
+        throw error;
+      }
+
+      if (data) {
+        setProfile({
+          id: data.id,
+          userId: data.user_id,
+          avatarSeed: data.avatar_seed,
+          avatarUrl: data.avatar_url,
+          nickname: data.nickname,
+          notifications: data.notifications,
+          theme: data.theme,
+          language: data.language,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        });
+      } else {
+        // Create default profile if none exists
+        const defaultProfile: UserProfile = {
+          id: '',
+          userId,
+          notifications: {
+            gameInvites: true,
+            dailyReminders: true,
+            achievements: true,
+            leaderboardUpdates: false,
+          },
+          theme: 'light',
+          language: 'pt-BR',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setProfile(defaultProfile);
+      }
+
+      setError(null);
+    } catch (err) {
+      console.error('Erro ao carregar perfil:', err);
+      setError('Erro ao carregar perfil do usuário');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!userId) {
       setProfile(null);
@@ -74,7 +133,7 @@ export function useUserProfile(userId: UserId | null) {
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [userId]); // Removed refreshTrigger from dependencies
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!userId || !profile) return;
@@ -110,5 +169,5 @@ export function useUserProfile(userId: UserId | null) {
     }
   };
 
-  return { profile, loading, error, updateProfile };
+  return { profile, loading, error, updateProfile, refreshProfile };
 }

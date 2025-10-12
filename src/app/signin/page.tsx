@@ -8,12 +8,18 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Email inválido – precisamos de um endereço real para missões futuras!'),
+  password: z.string().min(1, 'Sua senha precisa ser forte para proteger seus pontos!'),
+});
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const setUser = useSessionStore((state) => state.setUser);
   const router = useRouter();
 
@@ -22,56 +28,44 @@ export default function SignInPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Get user from our users table
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (existingUser) {
-          setUser({ id: existingUser.id, name: existingUser.username });
-          router.push('/home');
-        }
+        // User is authenticated, let onboarding handle the profile check
+        router.push('/onboarding');
       }
     };
 
     checkUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        const user = session.user;
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (existingUser) {
-          setUser({ id: existingUser.id, name: existingUser.username });
-          router.push('/home');
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setUser, router]);
+  }, [router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0] === 'email') fieldErrors.email = issue.message;
+        if (issue.path[0] === 'password') fieldErrors.password = issue.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
     setIsLoading(true);
 
     try {
-      const { data: _data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
         alert('Erro no login: ' + error.message);
+      } else if (data.user) {
+        // Login successful - let onboarding handle profile checks and redirects
+        router.push('/onboarding');
       }
-      // Success will be handled by the auth state change listener
     } catch (error) {
       alert('Erro inesperado: ' + error);
     } finally {
@@ -79,31 +73,16 @@ export default function SignInPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true);
-
-    try {
-      const { data: _data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/home`
-        }
-      });
-
-      if (error) {
-        alert('Erro no login com Google: ' + error.message);
-      }
-    } catch (error) {
-      alert('Erro inesperado: ' + error);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-8 sm:px-6 lg:px-8">
       <Card className="w-full max-w-sm sm:max-w-md mx-auto">
         <CardHeader className="pb-4">
+          <h1 className="text-center text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Tarefas do Futuro
+          </h1>
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Construa seu futuro com tarefas inteligentes!
+          </p>
           <CardTitle className="text-center text-xl sm:text-2xl">Entrar</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 px-4 sm:px-6">
@@ -114,11 +93,15 @@ export default function SignInPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors({ ...errors, email: undefined });
+                }}
+                placeholder="Seu email para dicas de tarefas futuras"
                 className="h-11 text-base"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
@@ -126,34 +109,20 @@ export default function SignInPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({ ...errors, password: undefined });
+                }}
                 placeholder="Sua senha"
                 className="h-11 text-base"
                 required
               />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
             </div>
             <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-gray-800 px-3 text-gray-500 dark:text-gray-400">Ou</span>
-            </div>
-          </div>
-
-          <Button
-            onClick={handleGoogleLogin}
-            variant="outline"
-            className="w-full h-11 text-base font-medium border-2"
-            disabled={isGoogleLoading}
-          >
-            {isGoogleLoading ? 'Conectando...' : 'Continuar com Google'}
-          </Button>
 
           <div className="text-center text-sm pt-2">
             <span className="text-gray-600 dark:text-gray-400">Não tem conta? </span>

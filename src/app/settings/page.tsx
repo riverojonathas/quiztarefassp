@@ -12,6 +12,7 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { supabase } from '../../lib/supabase';
 import { createAvatar } from '@dicebear/core';
 import { adventurer } from '@dicebear/collection';
+import { useAvatar } from '../../hooks/useAvatar';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -146,12 +147,14 @@ function ProfileSettings() {
     }
   }, [profile, user]);
 
+  const { generateNewSeed } = useAvatar();
+
   const generateAvatar = (seed: string) => {
     try {
       const avatar = createAvatar(adventurer, { seed });
       return avatar.toDataUri();
     } catch {
-      return '';
+      return '/avatar-default.svg';
     }
   };
 
@@ -244,7 +247,7 @@ function ProfileSettings() {
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white"
           />
           <Button
-            onClick={() => setAvatarSeed(Math.random().toString())}
+            onClick={() => setAvatarSeed(generateNewSeed())}
             className="bg-purple-500 hover:bg-purple-600 text-sm sm:text-base px-3 sm:px-4 py-2"
           >
             Gerar Novo

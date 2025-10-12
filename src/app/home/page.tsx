@@ -15,10 +15,11 @@ import Confetti from 'react-confetti';
 import { useSound } from 'use-sound';
 import { createAvatar } from '@dicebear/core';
 import { adventurer } from '@dicebear/collection';
+import { useAvatar } from '../../hooks/useAvatar';
 
 export default function HomePage() {
   const user = useSessionStore((state) => state.user);
-  const { profile } = useUserProfile(user?.id || null);
+  const { profile, refreshProfile } = useUserProfile(user?.id || null);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +42,7 @@ export default function HomePage() {
       const avatar = createAvatar(adventurer, { seed });
       return avatar.toDataUri();
     } catch {
-      return '/avatar-default.png';
+      return '/avatar-default.svg';
     }
   };
 
@@ -53,6 +54,9 @@ export default function HomePage() {
       router.push('/signin');
       return;
     }
+
+    // Refresh profile data when component mounts
+    refreshProfile();
 
     const loadLeaderboard = async () => {
       try {
@@ -126,7 +130,7 @@ export default function HomePage() {
     };
 
     loadLeaderboard();
-  }, [user, router, calculateXp, calculateLevel, calculateStreak, getBadges, playSuccess]);
+  }, [user, router, calculateXp, calculateLevel, calculateStreak, getBadges, playSuccess, refreshProfile]);
 
   const handlePlayNow = () => {
     router.push('/play');
@@ -143,8 +147,8 @@ export default function HomePage() {
         {/* Header com Avatar */}
         <div className="text-center mb-6 sm:mb-8 relative">
           <motion.img
-            src={profile?.avatarSeed ? generateAvatar(profile.avatarSeed) : '/avatar-default.png'}
-            alt="Avatar"
+            src={profile?.avatarSeed ? generateAvatar(profile.avatarSeed) : '/avatar-default.svg'}
+            alt={`Avatar personalizado de ${displayName}`}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-3 sm:mb-4 border-4 border-white"
             whileHover={{ scale: 1.1 }}
             onClick={() => playHover()}
