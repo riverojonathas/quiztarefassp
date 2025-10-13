@@ -253,7 +253,6 @@ function ProfileSettings() {
             Gerar Novo
           </Button>
         </div>
-        <p className="text-white/80 text-xs sm:text-sm">Avatares gerados dinamicamente com DiceBear.</p>
       </div>
 
       {/* Alterar Senha */}
