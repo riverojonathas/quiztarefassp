@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Settings, User, Bell, Palette, Globe, Save, Eye, EyeOff } from 'lucide-react';
+import { Settings, User, Bell, Palette, Save, Eye, EyeOff } from 'lucide-react';
 import { useSessionStore } from '../../state/useSessionStore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { supabase } from '../../lib/supabase';
@@ -23,7 +23,6 @@ export default function SettingsPage() {
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'notifications', label: 'Notificações', icon: Bell },
     { id: 'theme', label: 'Tema', icon: Palette },
-    { id: 'language', label: 'Idioma', icon: Globe },
   ];
 
   const renderContent = () => {
@@ -34,8 +33,6 @@ export default function SettingsPage() {
         return <NotificationsSettings />;
       case 'theme':
         return <ThemeSettings />;
-      case 'language':
-        return <LanguageSettings />;
       default:
         return <ProfileSettings />;
     }
@@ -56,7 +53,7 @@ export default function SettingsPage() {
         {/* Menu Mobile - Superior */}
         <div className="block lg:hidden mb-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+            <div className="grid grid-cols-3 gap-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -554,69 +551,6 @@ function ThemeSettings() {
           <Label htmlFor="halloween" className="text-white text-sm sm:text-base cursor-pointer">Halloween</Label>
           <span className="text-white/60 text-xs ml-auto">Em breve</span>
         </div>
-      </div>
-      <Button onClick={handleSave} disabled={loading} className="bg-blue-500 hover:bg-blue-600 w-full h-12 sm:h-10 text-sm sm:text-base">
-        <Save className="w-4 h-4 mr-2" />
-        {loading ? 'Salvando...' : 'Salvar'}
-      </Button>
-      {message && <p className="text-yellow-300 text-sm sm:text-base">{message}</p>}
-    </div>
-  );
-}
-
-function LanguageSettings() {
-  const user = useSessionStore((state) => state.user);
-  const { profile, loading: profileLoading, error: profileError, updateProfile } = useUserProfile(user?.id || null);
-  const [language, setLanguage] = useState('pt-BR');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  // Load language from profile
-  useEffect(() => {
-    if (profile?.language) {
-      setLanguage(profile.language);
-    }
-  }, [profile]);
-
-  const handleSave = async () => {
-    if (!user) return;
-
-    setLoading(true);
-    setMessage('');
-    try {
-      await updateProfile({
-        language,
-      });
-      setMessage('Idioma salvo com sucesso!');
-    } catch (error: unknown) {
-      const err = error as Error;
-      setMessage('Erro ao salvar idioma: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (profileLoading) {
-    return <div className="text-white">Carregando configurações...</div>;
-  }
-
-  if (profileError) {
-    return <div className="text-red-400">Erro ao carregar configurações: {profileError}</div>;
-  }
-
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Idioma</h2>
-      <div className="space-y-3 sm:space-y-4">
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="bg-white/10 border-white/20 text-white rounded-lg p-3 sm:p-2 w-full h-12 sm:h-10 text-sm sm:text-base"
-        >
-          <option value="pt-BR">Português (Brasil)</option>
-          <option value="en-US">English (US)</option>
-          <option value="es-ES">Español</option>
-        </select>
       </div>
       <Button onClick={handleSave} disabled={loading} className="bg-blue-500 hover:bg-blue-600 w-full h-12 sm:h-10 text-sm sm:text-base">
         <Save className="w-4 h-4 mr-2" />
