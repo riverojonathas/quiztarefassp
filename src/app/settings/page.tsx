@@ -259,6 +259,66 @@ function ProfileSettings() {
         <p className="text-white/60 text-xs sm:text-sm mt-1">O email não pode ser alterado aqui.</p>
       </div>
 
+      {/* Matrícula */}
+      <div className="space-y-3 sm:space-y-4">
+        <h3 className="text-lg sm:text-xl font-semibold text-white">Matrícula</h3>
+
+        <div>
+          <Label htmlFor="diretoriaEnsino" className="text-white text-sm sm:text-base">Diretoria de Ensino</Label>
+          <Input
+            id="diretoriaEnsino"
+            value={profile?.diretoriaEnsino || ''}
+            readOnly
+            className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
+            placeholder="Não informado"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="escola" className="text-white text-sm sm:text-base">Escola</Label>
+          <Input
+            id="escola"
+            value={profile?.escola || ''}
+            readOnly
+            className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
+            placeholder="Não informado"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="nivelEscolar" className="text-white text-sm sm:text-base">Nível Escolar</Label>
+          <Input
+            id="nivelEscolar"
+            value={profile?.nivelEscolar || ''}
+            readOnly
+            className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
+            placeholder="Não informado"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="serie" className="text-white text-sm sm:text-base">Série</Label>
+          <Input
+            id="serie"
+            value={profile?.serie || ''}
+            readOnly
+            className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
+            placeholder="Não informado"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="turma" className="text-white text-sm sm:text-base">Turma</Label>
+          <Input
+            id="turma"
+            value={profile?.turma || ''}
+            readOnly
+            className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
+            placeholder="Não informado"
+          />
+        </div>
+      </div>
+
       {/* Salvar Perfil */}
       <Button onClick={handleSaveProfile} disabled={loading} className="bg-blue-500 hover:bg-blue-600 w-full h-12 sm:h-10 text-sm sm:text-base">
         <Save className="w-4 h-4 mr-2" />

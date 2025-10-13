@@ -21,6 +21,13 @@ export interface UserProfile {
   };
   theme: 'original' | 'world-cup-2026' | 'halloween';
   language: string;
+  // Educational fields
+  diretoriaEnsino?: string;
+  escola?: string;
+  nivelEscolar?: string;
+  serie?: string;
+  turma?: string;
+  onboardingCompleted?: boolean;
   createdAt: string;
   updatedAt: string;
 }

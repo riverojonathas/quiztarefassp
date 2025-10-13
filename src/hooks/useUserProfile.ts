@@ -37,6 +37,12 @@ export function useUserProfile(userId: UserId | null) {
           notifications: data.notifications,
           theme: data.theme,
           language: data.language,
+          diretoriaEnsino: data.diretoria_ensino,
+          escola: data.escola,
+          nivelEscolar: data.nivel_escolar,
+          serie: data.serie,
+          turma: data.turma,
+          onboardingCompleted: data.onboarding_completed,
           createdAt: data.created_at,
           updatedAt: data.updated_at,
         });
@@ -101,6 +107,12 @@ export function useUserProfile(userId: UserId | null) {
             notifications: data.notifications,
             theme: data.theme,
             language: data.language,
+            diretoriaEnsino: data.diretoria_ensino,
+            escola: data.escola,
+            nivelEscolar: data.nivel_escolar,
+            serie: data.serie,
+            turma: data.turma,
+            onboardingCompleted: data.onboarding_completed,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
           });
@@ -152,6 +164,12 @@ export function useUserProfile(userId: UserId | null) {
           notifications: updatedProfile.notifications,
           theme: updatedProfile.theme,
           language: updatedProfile.language,
+          diretoria_ensino: updatedProfile.diretoriaEnsino,
+          escola: updatedProfile.escola,
+          nivel_escolar: updatedProfile.nivelEscolar,
+          serie: updatedProfile.serie,
+          turma: updatedProfile.turma,
+          onboarding_completed: updatedProfile.onboardingCompleted,
         }, {
           onConflict: 'user_id'
         });
