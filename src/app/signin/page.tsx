@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '../../state/useSessionStore';
-import { supabase } from '../../lib/supabase';
+import { safeSupabaseAuth, safeSupabaseDb } from '@/lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
@@ -28,8 +28,8 @@ export default function SignInPage() {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const result = await safeSupabaseAuth.getUser();
+      if ('data' in result && result.data?.user) {
         // User is authenticated, let onboarding handle the profile check
         router.push('/onboarding');
       }
@@ -57,34 +57,40 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const result = await safeSupabaseAuth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        setLoginError('Erro no login: ' + error.message);
-      } else if (data.user) {
+      if (result.error) {
+        setLoginError('Erro no login: ' + result.error);
+      } else if ('data' in result && result.data.user) {
         // Check user profile and onboarding status
-        const { data: profile, error: profileError } = await supabase
+        const profileResult = await safeSupabaseDb
           .from('user_profiles')
           .select('onboarding_completed, nickname, avatar_seed')
-          .eq('user_id', data.user.id)
+          .eq('user_id', result.data.user.id)
           .single();
 
-        console.log('Signin profile query result:', { profile, profileError });
+        console.log('Signin profile query result:', profileResult);
 
-        if (profileError && profileError.code !== 'PGRST116') {
-          setLoginError('Erro ao verificar perfil: ' + profileError.message);
+        if ('error' in profileResult && profileResult.error) {
+          // For network errors, allow login without profile check
+          if (profileResult.error === 'Network error: Please check your internet connection and try again.') {
+            router.push('/onboarding');
+          } else {
+            setLoginError('Erro ao verificar perfil: ' + profileResult.error);
+          }
           return;
         }
 
         // If profile doesn't exist or onboarding not completed, go to onboarding
-        if (!profile || !profile.onboarding_completed) {
+        const profileData = (profileResult as unknown as { data: { onboarding_completed: boolean; nickname?: string; avatar_seed?: string } }).data;
+        if (!profileData || !profileData.onboarding_completed) {
           router.push('/onboarding');
         } else {
           // Onboarding completed, go to home
-          setUser({ id: data.user.id, name: profile.nickname || data.user.email || 'Usuário' });
+          setUser({ id: result.data.user.id, name: profileData.nickname || result.data.user.email || 'Usuário' });
           router.push('/home');
         }
       }
@@ -202,11 +208,11 @@ export default function SignInPage() {
                   return;
                 }
                 try {
-                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                  const result = await safeSupabaseAuth.resetPasswordForEmail(email, {
                     redirectTo: `${window.location.origin}/reset-password`,
                   });
-                  if (error) {
-                    setLoginError('Erro ao enviar email de reset: ' + error.message);
+                  if (result.error) {
+                    setLoginError('Erro ao enviar email de reset: ' + result.error);
                   } else {
                     setLoginError('Email de reset enviado! Verifique sua caixa de entrada.');
                   }

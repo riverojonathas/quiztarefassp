@@ -65,10 +65,10 @@ export function Leaderboard({ entries, currentUserId, showPositions = true }: Le
           <ul className="space-y-2">
             {sortedEntries.map((entry, index) => {
               const position = index + 1;
-              const isCurrentUser = currentUserId && entry.userId === currentUserId;
+              const isCurrentUser = currentUserId && entry.user_id === currentUserId;
               return (
                 <motion.li
-                  key={`${entry.scope}-${entry.scopeId}-${entry.userId}`}
+                  key={`${entry.scope}-${entry.scope_id}-${entry.user_id}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -79,7 +79,7 @@ export function Leaderboard({ entries, currentUserId, showPositions = true }: Le
                   <div className="flex items-center gap-3">
                     {showPositions && getPositionIcon(position)}
                     <span className={`font-medium ${isCurrentUser ? 'text-blue-800 font-semibold' : 'text-gray-800'}`}>
-                      {entry.userId} {isCurrentUser && '(Você)'}
+                      {entry.user_id} {isCurrentUser && '(Você)'}
                     </span>
                   </div>
                   <span className={`font-bold text-lg ${isCurrentUser ? 'text-blue-600' : 'text-gray-700'}`}>

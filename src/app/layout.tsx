@@ -2,8 +2,10 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ErrorBoundary } from "../components/ErrorBoundary";
-import { PageTransition } from "../components/PageTransition";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { PageTransition } from "@/components/PageTransition";
+import { ThemeProvider } from "@/hooks/useTheme";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +33,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorBoundary>
-          <div className="min-h-screen flex flex-col">
-            <div className="flex-1">
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </div>
-          </div>
+          <ThemeProvider>
+            <AnimatedBackground>
+              <div className="flex-1">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </div>
+            </AnimatedBackground>
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

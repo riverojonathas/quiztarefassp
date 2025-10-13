@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LeaderboardEntry } from '../domain/models';
 import { supabase } from '../lib/supabase';
+import { dbToLeaderboardEntry, leaderboardEntryToDb } from '../lib/database-mappers';
 
 export function useLeaderboard(scope: string = 'geral', scopeId: string = 'all') {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -53,17 +54,17 @@ export function useLeaderboard(scope: string = 'geral', scopeId: string = 'all')
         console.log('useLeaderboard: Raw data from Supabase:', data);
         console.log('useLeaderboard: Data length:', data?.length || 0);
 
-        setEntries(data as LeaderboardEntry[]);
+        setEntries(data?.map(dbToLeaderboardEntry) || []);
         setError(null);
       } catch (err) {
         console.error('Erro ao carregar leaderboard:', err);
         // Fallback para dados mockados em caso de erro
         const mockData: LeaderboardEntry[] = [
-          { scope: 'geral', scopeId: 'all', userId: 'usuario1', score: 1700 },
-          { scope: 'geral', scopeId: 'all', userId: 'usuario2', score: 1600 },
-          { scope: 'geral', scopeId: 'all', userId: 'usuario3', score: 1500 },
-          { scope: 'geral', scopeId: 'all', userId: 'usuario4', score: 1400 },
-          { scope: 'geral', scopeId: 'all', userId: 'usuario5', score: 1300 },
+          { id: '1', scope: 'geral', scope_id: 'all', user_id: 'usuario1', score: 1700, created_at: null },
+          { id: '2', scope: 'geral', scope_id: 'all', user_id: 'usuario2', score: 1600, created_at: null },
+          { id: '3', scope: 'geral', scope_id: 'all', user_id: 'usuario3', score: 1500, created_at: null },
+          { id: '4', scope: 'geral', scope_id: 'all', user_id: 'usuario4', score: 1400, created_at: null },
+          { id: '5', scope: 'geral', scope_id: 'all', user_id: 'usuario5', score: 1300, created_at: null },
         ];
         console.log('useLeaderboard: Using fallback mock data');
         setEntries(mockData);
@@ -78,9 +79,10 @@ export function useLeaderboard(scope: string = 'geral', scopeId: string = 'all')
 
   const addEntry = async (entry: LeaderboardEntry) => {
     try {
+      const dbEntry = leaderboardEntryToDb(entry);
       const { error } = await supabase
         .from('leaderboard')
-        .insert(entry);
+        .insert(dbEntry);
 
       if (error) throw error;
 
@@ -94,7 +96,7 @@ export function useLeaderboard(scope: string = 'geral', scopeId: string = 'all')
         .limit(50);
 
       if (data) {
-        setEntries(data as LeaderboardEntry[]);
+        setEntries(data.map(dbToLeaderboardEntry));
       }
     } catch (err) {
       setError('Erro ao adicionar entrada no ranking');

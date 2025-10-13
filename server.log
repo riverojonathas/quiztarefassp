@@ -9,15 +9,21 @@
  Detected additional lockfiles: 
    * /Users/prom1/quiztarefassp/package-lock.json
 
- ⚠ Port 3000 is in use by process 13461, using available port 3001 instead.
    ▲ Next.js 15.5.4 (Turbopack)
-   - Local:        http://localhost:3001
-   - Network:      http://172.20.10.10:3001
+   - Local:        http://localhost:3000
+   - Network:      http://172.20.10.10:3000
    - Environments: .env.local
 
  ✓ Starting...
  ○ Compiling instrumentation Node.js ...
- ✓ Compiled instrumentation Node.js in 614ms
- ✓ Compiled instrumentation Edge in 190ms
- ✓ Ready in 2.1s
+ ✓ Compiled instrumentation Node.js in 789ms
+ ✓ Compiled instrumentation Edge in 219ms
+ ✓ Ready in 2.6s
+ ○ Compiling /api/test-connection ...
+ ✓ Compiled /api/test-connection in 998ms
+✅ Using remote Supabase: https://ntiadxsvduowjvxuahzy.supabase.co
+Auth state changed: INITIAL_SESSION no session
+(node:18060) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET /api/test-connection 200 in 2461ms
 [?25h

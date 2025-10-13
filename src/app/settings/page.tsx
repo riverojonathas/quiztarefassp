@@ -7,23 +7,27 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Settings, User, Bell, Palette, Shield, Save, Eye, EyeOff } from 'lucide-react';
+import { Settings, Save, Eye, EyeOff } from 'lucide-react';
 import { useSessionStore } from '../../state/useSessionStore';
 import { useUserProfile } from '../../hooks/useUserProfile';
-import { supabase } from '../../lib/supabase';
+import { supabase, safeSupabaseAuth } from '../../lib/supabase';
 import { createAvatar } from '@dicebear/core';
 import { adventurer } from '@dicebear/collection';
 import { useAvatar } from '../../hooks/useAvatar';
+import { useTheme } from '../../hooks/useTheme';
+import { TeamSelector } from '../../components/TeamSelector';
+import { ThemeTest } from '../../components/ThemeTest';
+import { ThemeIcon } from '../../components/ThemeIcon';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const router = useRouter();
 
   const menuItems = [
-    { id: 'profile', label: 'Perfil', icon: User },
-    { id: 'security', label: 'Segurança', icon: Shield },
-    { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'theme', label: 'Tema', icon: Palette },
+    { id: 'profile', label: 'Perfil', icon: 'user' },
+    { id: 'security', label: 'Segurança', icon: 'shield' },
+    { id: 'notifications', label: 'Notificações', icon: 'bell' },
+    { id: 'theme', label: 'Tema', icon: 'palette' },
   ];
 
   const renderContent = () => {
@@ -43,7 +47,7 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-3 sm:p-4 animate-fade-in flex flex-col"
+      className="min-h-screen p-3 sm:p-4 animate-fade-in flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -58,7 +62,6 @@ export default function SettingsPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
               {menuItems.map((item) => {
-                const Icon = item.icon;
                 return (
                   <button
                     key={item.id}
@@ -69,7 +72,7 @@ export default function SettingsPage() {
                         : 'text-white/70 hover:bg-white/10 hover:text-white'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <ThemeIcon name={item.icon} className="w-4 h-4" />
                     {item.label}
                   </button>
                 );
@@ -92,7 +95,6 @@ export default function SettingsPage() {
               <CardContent>
                 <nav className="space-y-2">
                   {menuItems.map((item) => {
-                    const Icon = item.icon;
                     return (
                       <button
                         key={item.id}
@@ -103,7 +105,7 @@ export default function SettingsPage() {
                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <ThemeIcon name={item.icon} className="w-5 h-5" />
                         {item.label}
                       </button>
                     );
@@ -167,9 +169,9 @@ function ProfileSettings() {
   useEffect(() => {
     const getUserEmail = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          setUserEmail(user.email);
+        const result = await safeSupabaseAuth.getUser();
+        if ('data' in result && result.data?.user?.email) {
+          setUserEmail(result.data.user.email);
         }
       } catch (error) {
         console.error('Error getting user email:', error);
@@ -183,7 +185,7 @@ function ProfileSettings() {
   useEffect(() => {
     if (profile) {
       setNickname(profile.nickname || user?.name || '');
-      setAvatarSeed(profile.avatarSeed || user?.id || 'default');
+      setAvatarSeed(profile.avatar_seed || user?.id || 'default');
     }
   }, [profile, user]);
 
@@ -206,7 +208,7 @@ function ProfileSettings() {
     try {
       await updateProfile({
         nickname: nickname !== user.name ? nickname : undefined,
-        avatarSeed,
+        avatar_seed: avatarSeed,
       });
 
       // Update session store if nickname changed
@@ -267,7 +269,7 @@ function ProfileSettings() {
           <Label htmlFor="diretoriaEnsino" className="text-white text-sm sm:text-base">Diretoria de Ensino</Label>
           <Input
             id="diretoriaEnsino"
-            value={profile?.diretoriaEnsino || ''}
+            value={profile?.diretoria_ensino || ''}
             readOnly
             className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
             placeholder="Não informado"
@@ -289,7 +291,7 @@ function ProfileSettings() {
           <Label htmlFor="nivelEscolar" className="text-white text-sm sm:text-base">Nível Escolar</Label>
           <Input
             id="nivelEscolar"
-            value={profile?.nivelEscolar || ''}
+            value={profile?.nivel_escolar || ''}
             readOnly
             className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
             placeholder="Não informado"
@@ -430,44 +432,7 @@ function NotificationsSettings() {
 }
 
 function ThemeSettings() {
-  const user = useSessionStore((state) => state.user);
-  const { profile, loading: profileLoading, error: profileError, updateProfile } = useUserProfile(user?.id || null);
-  const [theme, setTheme] = useState<'original' | 'world-cup-2026' | 'halloween'>('original');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  // Load theme from profile
-  useEffect(() => {
-    if (profile?.theme) {
-      setTheme(profile.theme);
-    }
-  }, [profile]);
-
-  const handleSave = async () => {
-    if (!user) return;
-
-    setLoading(true);
-    setMessage('');
-    try {
-      await updateProfile({
-        theme,
-      });
-      setMessage('Tema salvo com sucesso!');
-    } catch (error: unknown) {
-      const err = error as Error;
-      setMessage('Erro ao salvar tema: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (profileLoading) {
-    return <div className="text-white">Carregando configurações...</div>;
-  }
-
-  if (profileError) {
-    return <div className="text-red-400">Erro ao carregar configurações: {profileError}</div>;
-  }
+  const { themeName, setTheme, favoriteTeam } = useTheme();
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -479,7 +444,7 @@ function ThemeSettings() {
             type="radio"
             name="theme"
             value="original"
-            checked={theme === 'original'}
+            checked={themeName === 'original'}
             onChange={(e) => setTheme('original')}
             className="w-5 h-5"
           />
@@ -492,32 +457,34 @@ function ThemeSettings() {
             type="radio"
             name="theme"
             value="world-cup-2026"
-            checked={theme === 'world-cup-2026'}
+            checked={themeName === 'world-cup-2026'}
             onChange={(e) => setTheme('world-cup-2026')}
             className="w-5 h-5"
           />
           <Label htmlFor="world-cup-2026" className="text-white text-sm sm:text-base cursor-pointer">Copa do Mundo 2026</Label>
-          <span className="text-white/60 text-xs ml-auto">Em breve</span>
-        </div>
-        <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg">
-          <input
-            id="halloween"
-            type="radio"
-            name="theme"
-            value="halloween"
-            checked={theme === 'halloween'}
-            onChange={(e) => setTheme('halloween')}
-            className="w-5 h-5"
-          />
-          <Label htmlFor="halloween" className="text-white text-sm sm:text-base cursor-pointer">Halloween</Label>
-          <span className="text-white/60 text-xs ml-auto">Em breve</span>
+          <span className="text-white/60 text-xs ml-auto">Novo!</span>
         </div>
       </div>
-      <Button onClick={handleSave} disabled={loading} className="bg-blue-500 hover:bg-blue-600 w-full h-12 sm:h-10 text-sm sm:text-base">
-        <Save className="w-4 h-4 mr-2" />
-        {loading ? 'Salvando...' : 'Salvar'}
-      </Button>
-      {message && <p className="text-yellow-300 text-sm sm:text-base">{message}</p>}
+
+      {/* Seletor de Time - só aparece quando tema World Cup está selecionado */}
+      {themeName === 'world-cup-2026' && (
+        <div className="mt-6">
+          <TeamSelector />
+        </div>
+      )}
+
+      {favoriteTeam && themeName === 'world-cup-2026' && (
+        <div className="mt-4 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
+          <p className="text-green-300 text-sm text-center">
+            Tema personalizado aplicado com as cores do {favoriteTeam}!
+          </p>
+        </div>
+      )}
+
+      {/* Componente de debug para testar as cores */}
+      <div className="mt-6">
+        <ThemeTest />
+      </div>
     </div>
   );
 }
@@ -541,11 +508,11 @@ function SecuritySettings() {
     setLoading(true);
     setMessage('');
     try {
-      const { error } = await supabase.auth.updateUser({
+      const result = await safeSupabaseAuth.updateUser({
         password: newPassword
       });
 
-      if (error) throw error;
+      if (result.error) throw new Error(result.error);
 
       setMessage('Senha alterada com sucesso!');
       setCurrentPassword('');

@@ -80,9 +80,9 @@ export function QuestionCard({ question, onAnswer, disabled }: QuestionCardProps
             >
               {question.statement}
             </CardTitle>
-            {question.imageUrl && (
+            {question.image_url && (
               <Image
-                src={question.imageUrl}
+                src={question.image_url}
                 alt={`Ilustração para a pergunta: ${question.statement}`}
                 width={400}
                 height={300}

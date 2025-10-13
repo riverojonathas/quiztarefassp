@@ -9,27 +9,26 @@ export interface User {
 
 export interface UserProfile {
   id: string;
-  userId: UserId;
-  avatarSeed?: string;
-  avatarUrl?: string;
-  nickname?: string;
+  user_id: UserId | null;
+  avatar_seed: string | null;
+  avatar_url: string | null;
+  nickname: string | null;
   notifications: {
     gameInvites: boolean;
     dailyReminders: boolean;
     achievements: boolean;
     leaderboardUpdates: boolean;
-  };
-  theme: 'original' | 'world-cup-2026' | 'halloween';
-  language: string;
-  // Educational fields
-  diretoriaEnsino?: string;
-  escola?: string;
-  nivelEscolar?: string;
-  serie?: string;
-  turma?: string;
-  onboardingCompleted?: boolean;
-  createdAt: string;
-  updatedAt: string;
+  } | null;
+  theme: string | null;
+  language: string | null;
+  diretoria_ensino: string | null;
+  escola: string | null;
+  nivel_escolar: string | null;
+  serie: string | null;
+  turma: string | null;
+  onboarding_completed: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface Choice {
@@ -43,10 +42,11 @@ export interface Question {
   statement: string;
   choices: Choice[];
   difficulty: Difficulty;
-  tags: string[]; // ex.: ["BNCC-H1", "Frações"]
-  skill?: string; // fake para analytics
-  timeSuggestedSec?: number;
-  imageUrl?: string; // optional image for visual questions
+  tags: string[];
+  skill: string | null;
+  time_suggested_sec: number | null;
+  image_url: string | null;
+  created_at: string | null;
 }
 
 export interface PlayerState {
@@ -58,16 +58,19 @@ export interface PlayerState {
 
 export interface Match {
   id: string;
-  roomId: RoomId;
-  mode: 'solo' | 'dupla' | 'sala';
-  round: number;
-  totalRounds: number;
+  room_id: string;
   players: PlayerState[];
+  scores: Record<UserId, number>;
+  status: string;
+  started_at: string | null;
+  ended_at: string | null;
 }
 
 export interface LeaderboardEntry {
-  scope: 'turma' | 'escola' | 'serie' | 'de' | 'geral';
-  scopeId: string;
-  userId: UserId;
+  id: string;
+  scope: string;
+  scope_id: string;
+  user_id: UserId | null;
   score: number;
+  created_at: string | null;
 }

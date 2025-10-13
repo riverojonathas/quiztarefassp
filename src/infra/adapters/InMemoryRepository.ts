@@ -49,7 +49,7 @@ export class InMemoryRepository
 
   // MatchRepository
   async createMatch(match: Match): Promise<void> {
-    this.matches.set(match.roomId, match);
+    this.matches.set(match.room_id, match);
   }
 
   async getMatch(roomId: RoomId): Promise<Match | null> {
@@ -57,12 +57,12 @@ export class InMemoryRepository
   }
 
   async updateMatch(match: Match): Promise<void> {
-    this.matches.set(match.roomId, match);
+    this.matches.set(match.room_id, match);
   }
 
   // LeaderboardRepository
   async getLeaderboard(scope: string, scopeId: string): Promise<LeaderboardEntry[]> {
-    return this.leaderboard.filter(entry => entry.scope === scope && entry.scopeId === scopeId);
+    return this.leaderboard.filter(entry => entry.scope === scope && entry.scope_id === scopeId);
   }
 
   async addEntry(entry: LeaderboardEntry): Promise<void> {

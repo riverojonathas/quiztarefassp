@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { UserProfile, UserId } from '../domain/models';
 import { supabase } from '../lib/supabase';
+import { dbToUserProfile, userProfileToDb } from '../lib/database-mappers';
 
 export function useUserProfile(userId: UserId | null) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -28,29 +29,15 @@ export function useUserProfile(userId: UserId | null) {
       }
 
       if (data) {
-        setProfile({
-          id: data.id,
-          userId: data.user_id,
-          avatarSeed: data.avatar_seed,
-          avatarUrl: data.avatar_url,
-          nickname: data.nickname,
-          notifications: data.notifications,
-          theme: data.theme,
-          language: data.language,
-          diretoriaEnsino: data.diretoria_ensino,
-          escola: data.escola,
-          nivelEscolar: data.nivel_escolar,
-          serie: data.serie,
-          turma: data.turma,
-          onboardingCompleted: data.onboarding_completed,
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-        });
+        setProfile(dbToUserProfile(data));
       } else {
         // Create default profile if none exists
         const defaultProfile: UserProfile = {
           id: '',
-          userId,
+          user_id: userId,
+          avatar_seed: null,
+          avatar_url: null,
+          nickname: null,
           notifications: {
             gameInvites: true,
             dailyReminders: true,
@@ -59,8 +46,14 @@ export function useUserProfile(userId: UserId | null) {
           },
           theme: 'original',
           language: 'pt-BR',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          diretoria_ensino: null,
+          escola: null,
+          nivel_escolar: null,
+          serie: null,
+          turma: null,
+          onboarding_completed: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
         setProfile(defaultProfile);
       }
@@ -98,29 +91,15 @@ export function useUserProfile(userId: UserId | null) {
         }
 
         if (data) {
-          setProfile({
-            id: data.id,
-            userId: data.user_id,
-            avatarSeed: data.avatar_seed,
-            avatarUrl: data.avatar_url,
-            nickname: data.nickname,
-            notifications: data.notifications,
-            theme: data.theme,
-            language: data.language,
-            diretoriaEnsino: data.diretoria_ensino,
-            escola: data.escola,
-            nivelEscolar: data.nivel_escolar,
-            serie: data.serie,
-            turma: data.turma,
-            onboardingCompleted: data.onboarding_completed,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
-          });
+          setProfile(dbToUserProfile(data));
         } else {
           // Create default profile if none exists
           const defaultProfile: UserProfile = {
             id: '',
-            userId,
+            user_id: userId,
+            avatar_seed: null,
+            avatar_url: null,
+            nickname: null,
             notifications: {
               gameInvites: true,
               dailyReminders: true,
@@ -129,8 +108,14 @@ export function useUserProfile(userId: UserId | null) {
             },
             theme: 'original',
             language: 'pt-BR',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            diretoria_ensino: null,
+            escola: null,
+            nivel_escolar: null,
+            serie: null,
+            turma: null,
+            onboarding_completed: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           };
           setProfile(defaultProfile);
         }
@@ -154,23 +139,11 @@ export function useUserProfile(userId: UserId | null) {
       setLoading(true);
       const updatedProfile = { ...profile, ...updates };
 
+      const dbData = userProfileToDb(updatedProfile);
+
       const { error } = await supabase
         .from('user_profiles')
-        .upsert({
-          user_id: userId,
-          avatar_seed: updatedProfile.avatarSeed,
-          avatar_url: updatedProfile.avatarUrl,
-          nickname: updatedProfile.nickname,
-          notifications: updatedProfile.notifications,
-          theme: updatedProfile.theme,
-          language: updatedProfile.language,
-          diretoria_ensino: updatedProfile.diretoriaEnsino,
-          escola: updatedProfile.escola,
-          nivel_escolar: updatedProfile.nivelEscolar,
-          serie: updatedProfile.serie,
-          turma: updatedProfile.turma,
-          onboarding_completed: updatedProfile.onboardingCompleted,
-        }, {
+        .upsert(dbData, {
           onConflict: 'user_id'
         });
 

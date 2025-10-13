@@ -80,9 +80,14 @@ export default function HomePage() {
             userId: item.user_id,
             score: item.score
           }));
-          setLeaderboard(mappedData);
-
-          const userEntry = mappedData.find(entry => entry.userId === user.id);
+            setLeaderboard(mappedData.map((item: { scope: string; scopeId: string; userId: string | null; score: number }) => ({
+              id: item.userId || '',
+              scope: item.scope,
+              scope_id: item.scopeId,
+              user_id: item.userId,
+              score: item.score,
+              created_at: null
+            })));          const userEntry = mappedData.find(entry => entry.userId === user.id);
 
           if (userEntry) {
             const rank = mappedData.indexOf(userEntry) + 1;
@@ -147,7 +152,7 @@ export default function HomePage() {
         {/* Header com Avatar */}
         <div className="text-center mb-6 sm:mb-8 relative">
           <motion.img
-            src={profile?.avatarSeed ? generateAvatar(profile.avatarSeed) : '/avatar-default.svg'}
+            src={profile?.avatar_seed ? generateAvatar(profile.avatar_seed) : '/avatar-default.svg'}
             alt={`Avatar personalizado de ${displayName}`}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-3 sm:mb-4 border-4 border-white"
             whileHover={{ scale: 1.1 }}
