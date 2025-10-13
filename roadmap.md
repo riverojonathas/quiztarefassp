@@ -31,6 +31,8 @@ Este documento descreve as expansões planejadas para o app, organizadas em pass
   - Remoção de títulos desnecessários ("Perfil")
   - Menu responsivo aprimorado (4 abas: Perfil, Segurança, Notificações, Tema)
   - Email do usuário exibido corretamente do Supabase Auth
+- **Campos Educacionais Básicos**: Implementação inicial dos relacionamentos educacionais com campos em user_profiles (Diretoria de Ensino, Escola, Nível Escolar, Série, Turma)
+- **Som Animador de Início**: Sequência musical empolgante ao clicar em START no modo solo game, usando Web Audio API para experiência imersiva
 
 ### 1. **Front-end para Cadastro de Questões**
    - **Objetivo**: Permitir que usuários (professores/admin) cadastrem, editem e excluam questões diretamente no app.
@@ -96,7 +98,7 @@ Este documento descreve as expansões planejadas para o app, organizadas em pass
      - Filtros e relatórios por nível (ex.: desempenho por escola).
      - Importação em lote (ex.: CSV) para cadastro de alunos.
    - **Passos**: Adicionar campos à tabela `user_profiles`, criar tabelas `schools`, `classes`, `districts`, atualizar forms de cadastro/onboarding.
-   - **Status**: Não iniciado.
+   - **Status**: Parcialmente implementado (campos básicos adicionados à tabela user_profiles).
 
 ### 7. **Metas e Progresso**
    - **Objetivo**: Definir e rastrear metas educacionais para alunos.

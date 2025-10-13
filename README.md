@@ -19,10 +19,10 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - **⚙️ Configurações**: Personalizar app com 4 seções (Perfil, Segurança, Notificações, Tema)
 
 ### 🎮 Modos de Jogo
-- **🎯 Jogar Sozinho**: Prática individual com 3 perguntas cronometradas
+- **🎯 Jogar Sozinho**: Prática individual com 3 perguntas cronometradas e som animador de início
 - **� Trilha de Tarefas**: Sistema de progressão com fases educacionais (6 fases disponíveis)
 - **👥 Tarefas em Grupo**: Aprendizado colaborativo em sala de aula (em desenvolvimento)
-- **�👥 Jogar contra outro**: Multiplayer em tempo real via salas
+- **�� Jogar contra outro**: Multiplayer em tempo real via salas
 - **🏠 Sistema de Salas**: Criação/entrada por código curto
 - **⏱️ Quiz Cronometrado**: Perguntas objetivas com feedback instantâneo
 - **📊 Ranking Global**: Placar da sala e ranking geral
@@ -34,6 +34,15 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - **Nova seção Segurança**: Alteração de senha dedicada
 - **Perfil otimizado**: Avatar clicável ao lado do apelido
 - **Interface limpa**: Remoção de elementos desnecessários
+- **Seção Matrícula**: Campos educacionais (Diretoria, Escola, Nível, Série, Turma)
+
+### 🎵 Sistema de Áudio Imersivo
+- **Web Audio API**: Sons gerados proceduralmente para melhor performance
+- **Feedback Sonoro**: Áudio contextual para ações do usuário
+- **Som de Início**: Sequência musical empolgante ao começar jogo solo
+- **Avisos de Tempo**: Beeps urgentes nos últimos 5 segundos
+- **Feedback de Respostas**: Sons distintos para acertos e erros
+- **Compatibilidade**: Suporte cross-browser com fallbacks
 
 ## 📋 Visão Geral dos Sprints
 
@@ -65,7 +74,7 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 Para evoluir o app para um sistema educacional completo, consulte o [`roadmap.md`](roadmap.md) para detalhes sobre:
 - Módulo Professor
 - Sistema de Fases Configuráveis
-- Relacionamentos Educacionais (série, escola, turma, diretoria)
+- Relacionamentos Educacionais (série, escola, turma, diretoria) - **✅ Campos básicos implementados**
 - Metas e Progresso para Alunos
 - Tematização Dinâmica (temas comemorativos)
 - Front-end para Cadastro de Questões
@@ -77,6 +86,7 @@ Para evoluir o app para um sistema educacional completo, consulte o [`roadmap.md
 ### Frontend
 - **Next.js 14** (App Router) + **TypeScript**
 - **Tailwind CSS** + **shadcn/ui** + **Framer Motion**
+- **Web Audio API** para sons imersivos e feedback auditivo
 - **React Query** para estado servidor
 - **Zustand** para estado cliente
 
@@ -119,8 +129,9 @@ npm run dev
 2. **🏠 Home**: Veja seu ranking e estatísticas pessoais
 3. **🏆 Ranking**: Ver classificações globais
 4. **▶️ Jogar**: Escolha entre "Jogar sozinho" ou "Jogar contra outro"
-5. **👥 Salas**: Crie uma sala ou entre com código (ex.: `AB12`)
-6. **🎯 Sala**: Jogue perguntas, veja timer e placar
+5. **🎯 Solo Game**: Clique em START para ouvir som animador e começar o quiz
+6. **👥 Salas**: Crie uma sala ou entre com código (ex.: `AB12`)
+7. **🎯 Sala**: Jogue perguntas, veja timer e placar
 
 ## 📁 Estrutura do Projeto
 

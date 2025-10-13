@@ -16,37 +16,77 @@ interface Question {
 export default function SoloGamePage() {
   const router = useRouter();
 
+  // AudioContext compartilhado para melhor performance
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+
   // Funções para gerar sons usando Web Audio API
   const playSound = (frequency: number, duration: number, type: OscillatorType = 'sine') => {
     try {
-      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const audioContext = new AudioContextClass();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      let ctx = audioContext;
+      if (!ctx) {
+        const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        ctx = new AudioContextClass();
+        setAudioContext(ctx);
+      }
+
+      // Garantir que o AudioContext esteja ativo
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(ctx.destination);
 
       oscillator.frequency.value = frequency;
       oscillator.type = type;
 
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration);
     } catch (error) {
       console.warn('Web Audio API not supported:', error);
     }
   };
 
-  const playCorrectSound = () => playSound(800, 0.2, 'sine'); // Tom agudo curto
-  const playWrongSound = () => playSound(300, 0.5, 'sawtooth'); // Tom grave longo
+  const playCorrectSound = () => {
+    // Sequência animada de acerto: C4 - E4 - G4 (dó-ré-mi)
+    setTimeout(() => playSound(523, 0.15, 'sine'), 0);   // C4
+    setTimeout(() => playSound(659, 0.15, 'sine'), 150); // E4
+    setTimeout(() => playSound(784, 0.3, 'sine'), 300);  // G4
+  };
+
+  const playWrongSound = () => {
+    // Som de erro animado: descida rápida com efeito de "wah"
+    setTimeout(() => playSound(400, 0.1, 'sawtooth'), 0);   // Mi grave
+    setTimeout(() => playSound(300, 0.1, 'sawtooth'), 100); // Ré grave
+    setTimeout(() => playSound(200, 0.2, 'sawtooth'), 200); // Lá baixo
+    setTimeout(() => playSound(150, 0.3, 'sawtooth'), 300); // Sol baixo
+  };
   const playGameOverSound = () => {
     // Sequência de notas para fim de jogo
     setTimeout(() => playSound(523, 0.2), 0);   // C
     setTimeout(() => playSound(659, 0.2), 200); // E
     setTimeout(() => playSound(784, 0.4), 400); // G
+  };
+
+  const playWarningSound = () => {
+    console.log('Tentando tocar som de aviso');
+    // Som de aviso para tempo crítico - beep agudo e urgente
+    playSound(1000, 0.15, 'square'); // Beep agudo mais longo para ser mais perceptível
+  };
+
+  const playStartSound = () => {
+    // Sequência animada e empolgante para início do jogo: subida rápida e energética
+    setTimeout(() => playSound(523, 0.1, 'sine'), 0);   // C4
+    setTimeout(() => playSound(659, 0.1, 'sine'), 100); // E4
+    setTimeout(() => playSound(784, 0.1, 'sine'), 200); // G4
+    setTimeout(() => playSound(1047, 0.2, 'sine'), 300); // C5 - nota alta para empolgação
+    setTimeout(() => playSound(1319, 0.3, 'triangle'), 400); // E5 - som mais rico para clímax
   };
 
   // Função para vibração
@@ -64,7 +104,9 @@ export default function SoloGamePage() {
   const [gameFinished, setGameFinished] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [warningInterval, setWarningInterval] = useState<NodeJS.Timeout | null>(null);
   const [shakeAnimation, setShakeAnimation] = useState<'correct' | 'wrong' | null>(null);
+  const [showTimer, setShowTimer] = useState(true);
 
   // Mock questions for solo play
   const mockQuestions: Question[] = [
@@ -103,21 +145,63 @@ export default function SoloGamePage() {
     }
   }, [timeLeft, gameStarted, showResult]);
 
+  // Efeito para aviso sonoro quando tempo está crítico
+  useEffect(() => {
+    // Limpar intervalo anterior sempre que as dependências mudam
+    if (warningInterval) {
+      clearInterval(warningInterval);
+      setWarningInterval(null);
+    }
+
+    if (gameStarted && timeLeft <= 5 && timeLeft > 0 && !showResult) {
+      console.log('Iniciando aviso sonoro - tempo crítico:', timeLeft);
+      // Iniciar intervalo de aviso sonoro
+      const interval = setInterval(() => {
+        console.log('Tocando beep de aviso - tempo:', timeLeft);
+        playWarningSound();
+      }, 1000); // Toca a cada segundo
+      setWarningInterval(interval);
+    }
+
+    // Cleanup quando o componente desmonta
+    return () => {
+      if (warningInterval) {
+        console.log('Limpando intervalo de aviso sonoro');
+        clearInterval(warningInterval);
+        setWarningInterval(null);
+      }
+    };
+  }, [timeLeft, gameStarted, showResult]); // Removido warningInterval das dependências para evitar loops
+
   const startGame = () => {
+    // Inicializar AudioContext na primeira interação do usuário
+    if (!audioContext) {
+      try {
+        const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AudioContextClass();
+        setAudioContext(ctx);
+        // Tentar resumir o contexto (alguns navegadores requerem isso)
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+      } catch (error) {
+        console.warn('Erro ao inicializar AudioContext:', error);
+      }
+    }
+
+    // Tocar som animador de início
+    playStartSound();
+
     setGameStarted(true);
     loadNextQuestion();
   };
 
   const loadNextQuestion = () => {
-    if (questionNumber <= mockQuestions.length) {
-      const question = mockQuestions[questionNumber - 1];
-      setCurrentQuestion(question);
-      setTimeLeft(question.timeLimit);
-      setSelectedAnswer(null);
-      setShowResult(false);
-    } else {
-      setGameFinished(true);
-    }
+    const question = mockQuestions[questionNumber - 1];
+    setCurrentQuestion(question);
+    setTimeLeft(question.timeLimit);
+    setSelectedAnswer(null);
+    setShowResult(false);
   };
 
   const handleAnswer = (answerIndex: number) => {
@@ -153,12 +237,23 @@ export default function SoloGamePage() {
     }, 1000);
 
     setTimeout(() => {
-      setQuestionNumber(prev => prev + 1);
-      loadNextQuestion();
+      // Verificar se é a última pergunta antes de incrementar
+      if (questionNumber >= mockQuestions.length) {
+        setGameFinished(true);
+      } else {
+        setQuestionNumber(prev => prev + 1);
+        loadNextQuestion();
+      }
     }, 2000);
   };
 
   const resetGame = () => {
+    // Limpar intervalo de aviso sonoro
+    if (warningInterval) {
+      clearInterval(warningInterval);
+      setWarningInterval(null);
+    }
+
     setGameStarted(false);
     setGameFinished(false);
     setScore(0);
@@ -167,6 +262,7 @@ export default function SoloGamePage() {
     setSelectedAnswer(null);
     setShowResult(false);
     setTimeLeft(30);
+    setShowTimer(true);
   };
 
   // Efeito para tocar som de fim de jogo
@@ -178,38 +274,36 @@ export default function SoloGamePage() {
 
   if (gameFinished) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-24">
-        <main className="pt-20 px-4 pb-24">
-          <div className="max-w-md mx-auto text-center">
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <div className="text-6xl mb-4">🎉</div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Parabéns!
-              </h1>
-              <p className="text-gray-600 mb-6">
-                Você completou o modo treino!
-              </p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 py-8">
+        <main className="w-full max-w-md">
+          <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Parabéns!
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Você completou o modo treino!
+            </p>
 
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 mb-6">
-                <div className="text-2xl font-bold">{score}</div>
-                <div className="text-sm opacity-90">Pontos Totais</div>
-              </div>
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 mb-6">
+              <div className="text-2xl font-bold">{score}</div>
+              <div className="text-sm opacity-90">Pontos Totais</div>
+            </div>
 
-              <div className="space-y-3">
-                <button
-                  onClick={resetGame}
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl py-3 font-semibold hover:shadow-lg active:scale-95 transition-all duration-300"
-                >
-                  Jogar Novamente
-                </button>
+            <div className="space-y-3">
+              <button
+                onClick={resetGame}
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl py-3 font-semibold hover:shadow-lg active:scale-95 transition-all duration-300"
+              >
+                Jogar Novamente
+              </button>
 
-                <button
-                  onClick={() => router.push('/play')}
-                  className="w-full bg-gray-200 text-gray-700 rounded-xl py-3 font-semibold hover:bg-gray-300 active:scale-95 transition-all duration-300"
-                >
-                  Voltar ao Menu
-                </button>
-              </div>
+              <button
+                onClick={() => router.push('/play')}
+                className="w-full bg-gray-200 text-gray-700 rounded-xl py-3 font-semibold hover:bg-gray-300 active:scale-95 transition-all duration-300"
+              >
+                Voltar ao Menu
+              </button>
             </div>
           </div>
         </main>
@@ -225,9 +319,25 @@ export default function SoloGamePage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 text-center">
               Você está pronto?
             </h1>
-            <p className="text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg text-center">
-              Teste seus conhecimentos agora
-            </p>
+
+            {/* Toggle Timer */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <span className="text-sm font-medium text-gray-700">Mostrar timer</span>
+                <button
+                  onClick={() => setShowTimer(!showTimer)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                    showTimer ? 'bg-indigo-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                      showTimer ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
 
             <div className="space-y-3 sm:space-y-4">
               <button
@@ -241,7 +351,7 @@ export default function SoloGamePage() {
                 onClick={() => router.push('/home')}
                 className="w-full bg-gray-200 text-gray-700 rounded-xl py-3 font-semibold hover:bg-gray-300 active:scale-95 transition-all duration-300"
               >
-                Sair
+                Voltar para a home
               </button>
             </div>
           </div>
@@ -264,22 +374,30 @@ export default function SoloGamePage() {
             </div>
           </div>
 
-          {/* Timer */}
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">Tempo</span>
-              <span className={`text-lg font-bold ${timeLeft <= 5 ? 'text-red-500' : 'text-gray-900'}`}>
-                {timeLeft}s
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-1000 ${
-                  timeLeft <= 5 ? 'bg-red-500' : 'bg-indigo-500'
-                }`}
-                style={{ width: `${(timeLeft / (currentQuestion?.timeLimit || 30)) * 100}%` }}
-              ></div>
-            </div>
+          {/* Timer - Sempre reserva espaço */}
+          <div className="mb-4 min-h-[60px] flex items-end">
+            {(showTimer || timeLeft <= 5) && (
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Tempo</span>
+                  <span className={`text-lg font-bold ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-gray-900'}`}>
+                    {timeLeft <= 5 ? `⏰ ${timeLeft}s` : `${timeLeft}s`}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-1000 ${
+                      timeLeft <= 5 ? 'bg-red-500' : 'bg-indigo-500'
+                    }`}
+                    style={{
+                      width: timeLeft <= 5
+                        ? `${(timeLeft / 5) * 100}%`  // Barra baseada nos 5 segundos finais
+                        : `${(timeLeft / (currentQuestion?.timeLimit || 30)) * 100}%`  // Barra baseada no tempo total
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Questão */}
@@ -368,10 +486,10 @@ export default function SoloGamePage() {
           {/* Botão sair */}
           <div className="text-center mt-2">
             <button
-              onClick={() => router.push('/play')}
+              onClick={resetGame}
               className="text-gray-500 hover:text-gray-700 transition-colors duration-300 text-sm"
             >
-              Sair do treino
+              Sair do desafio
             </button>
           </div>
         </div>
