@@ -429,7 +429,7 @@ function NotificationsSettings() {
 function ThemeSettings() {
   const user = useSessionStore((state) => state.user);
   const { profile, loading: profileLoading, error: profileError, updateProfile } = useUserProfile(user?.id || null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'original' | 'world-cup-2026' | 'halloween'>('original');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -472,27 +472,42 @@ function ThemeSettings() {
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg">
           <input
-            id="light"
+            id="original"
             type="radio"
             name="theme"
-            value="light"
-            checked={theme === 'light'}
-            onChange={(e) => setTheme('light')}
+            value="original"
+            checked={theme === 'original'}
+            onChange={(e) => setTheme('original')}
             className="w-5 h-5"
           />
-          <Label htmlFor="light" className="text-white text-sm sm:text-base cursor-pointer">Claro</Label>
+          <Label htmlFor="original" className="text-white text-sm sm:text-base cursor-pointer">Original</Label>
+          <span className="text-white/60 text-xs ml-auto">Padrão</span>
         </div>
         <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg">
           <input
-            id="dark"
+            id="world-cup-2026"
             type="radio"
             name="theme"
-            value="dark"
-            checked={theme === 'dark'}
-            onChange={(e) => setTheme('dark')}
+            value="world-cup-2026"
+            checked={theme === 'world-cup-2026'}
+            onChange={(e) => setTheme('world-cup-2026')}
             className="w-5 h-5"
           />
-          <Label htmlFor="dark" className="text-white text-sm sm:text-base cursor-pointer">Escuro</Label>
+          <Label htmlFor="world-cup-2026" className="text-white text-sm sm:text-base cursor-pointer">Copa do Mundo 2026</Label>
+          <span className="text-white/60 text-xs ml-auto">Em breve</span>
+        </div>
+        <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg">
+          <input
+            id="halloween"
+            type="radio"
+            name="theme"
+            value="halloween"
+            checked={theme === 'halloween'}
+            onChange={(e) => setTheme('halloween')}
+            className="w-5 h-5"
+          />
+          <Label htmlFor="halloween" className="text-white text-sm sm:text-base cursor-pointer">Halloween</Label>
+          <span className="text-white/60 text-xs ml-auto">Em breve</span>
         </div>
       </div>
       <Button onClick={handleSave} disabled={loading} className="bg-blue-500 hover:bg-blue-600 w-full h-12 sm:h-10 text-sm sm:text-base">

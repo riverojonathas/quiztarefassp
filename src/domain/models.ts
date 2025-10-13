@@ -19,7 +19,7 @@ export interface UserProfile {
     achievements: boolean;
     leaderboardUpdates: boolean;
   };
-  theme: 'light' | 'dark';
+  theme: 'original' | 'world-cup-2026' | 'halloween';
   language: string;
   createdAt: string;
   updatedAt: string;
