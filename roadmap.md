@@ -33,6 +33,9 @@ Este documento descreve as expansões planejadas para o app, organizadas em pass
   - Email do usuário exibido corretamente do Supabase Auth
 - **Campos Educacionais Básicos**: Implementação inicial dos relacionamentos educacionais com campos em user_profiles (Diretoria de Ensino, Escola, Nível Escolar, Série, Turma)
 - **Som Animador de Início**: Sequência musical empolgante ao clicar em START no modo solo game, usando Web Audio API para experiência imersiva
+- **Jogar Sozinho Aprimorado**: 
+  - **Tentativas Múltiplas Educativas**: Sistema que permite ao jogador tentar novamente quando erra uma resposta, mantendo feedback visual (destaque vermelho com pulso) mas não bloqueando novas tentativas até acertar ou tempo acabar
+  - **Confetti Estratégico**: Confetti removido de respostas individuais e mantido apenas na tela de parabéns final, evitando cansaço visual e tornando a celebração mais especial
 
 ### 1. **Front-end para Cadastro de Questões**
    - **Objetivo**: Permitir que usuários (professores/admin) cadastrem, editem e excluam questões diretamente no app.

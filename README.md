@@ -20,9 +20,11 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 
 ### 🎮 Modos de Jogo
 - **🎯 Jogar Sozinho**: Prática individual com 3 perguntas cronometradas e som animador de início
-- **� Trilha de Tarefas**: Sistema de progressão com fases educacionais (6 fases disponíveis)
+  - **Tentativas Múltiplas**: Quando erra uma resposta, ela fica destacada em vermelho mas permite tentar novamente até acertar ou o tempo acabar
+  - **Confetti Especial**: Celebração com confetti aparece apenas na tela de parabéns ao completar o modo treino
+- **📚 Trilha de Tarefas**: Sistema de progressão com fases educacionais (6 fases disponíveis)
 - **👥 Tarefas em Grupo**: Aprendizado colaborativo em sala de aula (em desenvolvimento)
-- **�� Jogar contra outro**: Multiplayer em tempo real via salas
+- **👥 Jogar contra outro**: Multiplayer em tempo real via salas
 - **🏠 Sistema de Salas**: Criação/entrada por código curto
 - **⏱️ Quiz Cronometrado**: Perguntas objetivas com feedback instantâneo
 - **📊 Ranking Global**: Placar da sala e ranking geral
@@ -43,6 +45,13 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - **Avisos de Tempo**: Beeps urgentes nos últimos 5 segundos
 - **Feedback de Respostas**: Sons distintos para acertos e erros
 - **Compatibilidade**: Suporte cross-browser com fallbacks
+
+## ✨ Melhorias Recentes
+
+### 🎯 Jogar Sozinho Aprimorado
+- **Tentativas Múltiplas Educativas**: Quando o jogador erra uma resposta, ela fica visualmente destacada em vermelho com animação de pulso, mas permite continuar tentando até acertar ou o tempo acabar - tornando o aprendizado mais efetivo
+- **Confetti Estratégico**: Removido o confetti de cada resposta correta para evitar cansaço visual, mantendo apenas a celebração especial na tela de parabéns ao completar o modo treino
+- **Feedback Visual Inteligente**: Respostas erradas são marcadas mas não bloqueiam novas tentativas, incentivando o aprendizado ativo
 
 ## 📋 Visão Geral dos Sprints
 
