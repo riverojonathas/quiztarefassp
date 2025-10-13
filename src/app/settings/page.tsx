@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Settings, User, Bell, Palette, Save, Eye, EyeOff } from 'lucide-react';
+import { Settings, User, Bell, Palette, Shield, Save, Eye, EyeOff } from 'lucide-react';
 import { useSessionStore } from '../../state/useSessionStore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { supabase } from '../../lib/supabase';
@@ -21,6 +21,7 @@ export default function SettingsPage() {
 
   const menuItems = [
     { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'security', label: 'Segurança', icon: Shield },
     { id: 'notifications', label: 'Notificações', icon: Bell },
     { id: 'theme', label: 'Tema', icon: Palette },
   ];
@@ -29,6 +30,8 @@ export default function SettingsPage() {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings />;
+      case 'security':
+        return <SecuritySettings />;
       case 'notifications':
         return <NotificationsSettings />;
       case 'theme':
@@ -53,7 +56,7 @@ export default function SettingsPage() {
         {/* Menu Mobile - Superior */}
         <div className="block lg:hidden mb-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1">
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -154,12 +157,6 @@ function ProfileSettings() {
   const user = useSessionStore((state) => state.user);
   const { profile, loading: profileLoading, error: profileError, updateProfile } = useUserProfile(user?.id || null);
   const [nickname, setNickname] = useState(user?.name || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState('adventurer');
   const [avatarSeed, setAvatarSeed] = useState(user?.id || 'default');
   const [userEmail, setUserEmail] = useState('');
@@ -226,46 +223,28 @@ function ProfileSettings() {
     }
   };
 
-  const handleChangePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      setMessage('As senhas não coincidem.');
-      return;
-    }
-    setLoading(true);
-    setMessage('');
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) throw error;
-
-      setMessage('Senha alterada com sucesso!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: unknown) {
-      const err = error as Error;
-      setMessage('Erro ao alterar senha: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="space-y-4 sm:space-y-6">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Perfil</h2>
-
-      {/* Apelido */}
-      <div>
-        <Label htmlFor="nickname" className="text-white text-sm sm:text-base">Apelido</Label>
-        <Input
-          id="nickname"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="bg-white/10 border-white/20 text-white placeholder-white/50 h-12 sm:h-10 mt-1"
-          placeholder="Seu apelido"
-        />
+      {/* Avatar e Apelido lado a lado */}
+      <div className="flex items-start gap-4 sm:gap-6">
+        <div className="flex-shrink-0">
+          <img
+            src={generateAvatar(avatarSeed)}
+            alt="Avatar atual"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white cursor-pointer hover:scale-105 transition-transform duration-200"
+            onClick={() => setAvatarSeed(generateNewSeed())}
+          />
+        </div>
+        <div className="flex-1">
+          <Label htmlFor="nickname" className="text-white text-sm sm:text-base">Apelido</Label>
+          <Input
+            id="nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="bg-white/10 border-white/20 text-white placeholder-white/50 h-12 sm:h-10 mt-1"
+            placeholder="Seu apelido"
+          />
+        </div>
       </div>
 
       {/* Email (somente leitura) */}
@@ -278,84 +257,6 @@ function ProfileSettings() {
           className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
         />
         <p className="text-white/60 text-xs sm:text-sm mt-1">O email não pode ser alterado aqui.</p>
-      </div>
-
-      {/* Avatar */}
-      <div>
-        <Label className="text-white text-sm sm:text-base">Avatar</Label>
-        <div className="flex items-center gap-3 sm:gap-4 mb-4 mt-2">
-          <img
-            src={generateAvatar(avatarSeed)}
-            alt="Avatar atual"
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white"
-          />
-          <Button
-            onClick={() => setAvatarSeed(generateNewSeed())}
-            className="bg-purple-500 hover:bg-purple-600 text-sm sm:text-base px-3 sm:px-4 py-2"
-          >
-            Gerar Novo
-          </Button>
-        </div>
-      </div>
-
-      {/* Alterar Senha */}
-      <div className="space-y-3 sm:space-y-4">
-        <h3 className="text-lg sm:text-xl font-semibold text-white">Alterar Senha</h3>
-        <div className="relative">
-          <Label htmlFor="currentPassword" className="text-white text-sm sm:text-base">Senha Atual</Label>
-          <Input
-            id="currentPassword"
-            type={showCurrentPassword ? 'text' : 'password'}
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
-          />
-          <button
-            type="button"
-            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-            className="absolute right-3 top-8 sm:top-7 text-white"
-          >
-            {showCurrentPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-          </button>
-        </div>
-        <div className="relative">
-          <Label htmlFor="newPassword" className="text-white text-sm sm:text-base">Nova Senha</Label>
-          <Input
-            id="newPassword"
-            type={showNewPassword ? 'text' : 'password'}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
-          />
-          <button
-            type="button"
-            onClick={() => setShowNewPassword(!showNewPassword)}
-            className="absolute right-3 top-8 sm:top-7 text-white"
-          >
-            {showNewPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-          </button>
-        </div>
-        <div className="relative">
-          <Label htmlFor="confirmPassword" className="text-white text-sm sm:text-base">Confirmar Nova Senha</Label>
-          <Input
-            id="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-8 sm:top-7 text-white"
-          >
-            {showConfirmPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-          </button>
-        </div>
-        <Button onClick={handleChangePassword} disabled={loading} className="bg-green-500 hover:bg-green-600 w-full h-12 sm:h-10 text-sm sm:text-base">
-          <Save className="w-4 h-4 mr-2" />
-          Alterar Senha
-        </Button>
       </div>
 
       {/* Salvar Perfil */}
@@ -556,6 +457,112 @@ function ThemeSettings() {
         <Save className="w-4 h-4 mr-2" />
         {loading ? 'Salvando...' : 'Salvar'}
       </Button>
+      {message && <p className="text-yellow-300 text-sm sm:text-base">{message}</p>}
+    </div>
+  );
+}
+
+function SecuritySettings() {
+  const user = useSessionStore((state) => state.user);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setMessage('As senhas não coincidem.');
+      return;
+    }
+    setLoading(true);
+    setMessage('');
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      setMessage('Senha alterada com sucesso!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: unknown) {
+      const err = error as Error;
+      setMessage('Erro ao alterar senha: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Segurança</h2>
+
+      {/* Alterar Senha */}
+      <div className="space-y-3 sm:space-y-4">
+        <h3 className="text-lg sm:text-xl font-semibold text-white">Alterar Senha</h3>
+        <div className="relative">
+          <Label htmlFor="currentPassword" className="text-white text-sm sm:text-base">Senha Atual</Label>
+          <Input
+            id="currentPassword"
+            type={showCurrentPassword ? 'text' : 'password'}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
+          />
+          <button
+            type="button"
+            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            className="absolute right-3 top-8 sm:top-7 text-white"
+          >
+            {showCurrentPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+          </button>
+        </div>
+        <div className="relative">
+          <Label htmlFor="newPassword" className="text-white text-sm sm:text-base">Nova Senha</Label>
+          <Input
+            id="newPassword"
+            type={showNewPassword ? 'text' : 'password'}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
+          />
+          <button
+            type="button"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            className="absolute right-3 top-8 sm:top-7 text-white"
+          >
+            {showNewPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+          </button>
+        </div>
+        <div className="relative">
+          <Label htmlFor="confirmPassword" className="text-white text-sm sm:text-base">Confirmar Nova Senha</Label>
+          <Input
+            id="confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="bg-white/10 border-white/20 text-white placeholder-white/50 pr-10 h-12 sm:h-10 mt-1"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-8 sm:top-7 text-white"
+          >
+            {showConfirmPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+          </button>
+        </div>
+        <Button onClick={handleChangePassword} disabled={loading} className="bg-green-500 hover:bg-green-600 w-full h-12 sm:h-10 text-sm sm:text-base">
+          <Save className="w-4 h-4 mr-2" />
+          Alterar Senha
+        </Button>
+      </div>
+
       {message && <p className="text-yellow-300 text-sm sm:text-base">{message}</p>}
     </div>
   );

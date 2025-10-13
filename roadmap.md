@@ -25,6 +25,12 @@ Este documento descreve as expansões planejadas para o app, organizadas em pass
 - **Página Trilha de Tarefas**: Sistema de 6 fases educacionais com cards visuais e status "Em breve"
 - **Página Tarefas em Grupo**: Explicação das modalidades colaborativas com banner "Em desenvolvimento"
 - **Texto Renovado**: "Escolha seu Modo de Jogo" para melhor comunicação educacional
+- **Interface de Configurações Otimizada**: 
+  - Avatar clicável ao lado do campo de apelido (layout mais eficiente)
+  - Nova seção "Segurança" dedicada para alteração de senha
+  - Remoção de títulos desnecessários ("Perfil")
+  - Menu responsivo aprimorado (4 abas: Perfil, Segurança, Notificações, Tema)
+  - Email do usuário exibido corretamente do Supabase Auth
 
 ### 1. **Front-end para Cadastro de Questões**
    - **Objetivo**: Permitir que usuários (professores/admin) cadastrem, editem e excluam questões diretamente no app.

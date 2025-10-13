@@ -16,7 +16,7 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - **📚 Trilha de Tarefas**: Sistema de progressão educacional com fases
 - **👥 Tarefas em Grupo**: Aprendizado colaborativo (em desenvolvimento)
 - **👥 Salas**: Criar/acessar salas de jogo multiplayer
-- **⚙️ Configurações**: Personalizar app e sair da conta
+- **⚙️ Configurações**: Personalizar app com 4 seções (Perfil, Segurança, Notificações, Tema)
 
 ### 🎮 Modos de Jogo
 - **🎯 Jogar Sozinho**: Prática individual com 3 perguntas cronometradas
@@ -31,6 +31,9 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - Login/cadastro com email e senha
 - Google OAuth integration
 - Gerenciamento de sessão seguro
+- **Nova seção Segurança**: Alteração de senha dedicada
+- **Perfil otimizado**: Avatar clicável ao lado do apelido
+- **Interface limpa**: Remoção de elementos desnecessários
 
 ## 📋 Visão Geral dos Sprints
 
@@ -67,7 +70,7 @@ Para evoluir o app para um sistema educacional completo, consulte o [`roadmap.md
 - Tematização Dinâmica (temas comemorativos)
 - Front-end para Cadastro de Questões
 - Jogos Configuráveis e Múltiplas Modalidades
-- Itens inacabados (ex.: integração solo game com Supabase)
+- **✅ Interface de Configurações Otimizada**: Avatar interativo, seção Segurança dedicada, layout responsivo aprimorado
 
 ## 🛠️ Stack Tecnológico
 
@@ -283,3 +286,5 @@ Este projeto é uma demonstração técnica completa de uma aplicação moderna 
 ---
 
 **🎉 Projeto Showcase**: Esta aplicação demonstra expertise completa em React/Next.js, incluindo arquitetura moderna, acessibilidade, performance, CI/CD, monitoramento e deploy em produção.
+
+*Última atualização: 12 de outubro de 2025*
