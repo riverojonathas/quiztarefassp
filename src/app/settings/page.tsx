@@ -165,8 +165,25 @@ function ProfileSettings() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState('adventurer');
   const [avatarSeed, setAvatarSeed] = useState(user?.id || 'default');
+  const [userEmail, setUserEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Load user email from Supabase auth
+  useEffect(() => {
+    const getUserEmail = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          setUserEmail(user.email);
+        }
+      } catch (error) {
+        console.error('Error getting user email:', error);
+      }
+    };
+
+    getUserEmail();
+  }, []);
 
   // Load profile data when available
   useEffect(() => {
@@ -259,7 +276,7 @@ function ProfileSettings() {
         <Label htmlFor="email" className="text-white text-sm sm:text-base">Email</Label>
         <Input
           id="email"
-          value={user?.id || ''} // Usar ID como placeholder, já que não temos email
+          value={userEmail}
           readOnly
           className="bg-white/10 border-white/20 text-white h-12 sm:h-10 mt-1"
         />
