@@ -53,6 +53,39 @@ Um app de perguntas e respostas competitivo, estilo "Perguntados", construído c
 - **Confetti Estratégico**: Removido o confetti de cada resposta correta para evitar cansaço visual, mantendo apenas a celebração especial na tela de parabéns ao completar o modo treino
 - **Feedback Visual Inteligente**: Respostas erradas são marcadas mas não bloqueiam novas tentativas, incentivando o aprendizado ativo
 
+### ⚽ Tema da Copa do Mundo 2026
+**Status**: Planejado | **Objetivo**: Criar engajamento temático durante a Copa do Mundo 2026 com modificações visuais, funcionais e técnicas, mantendo o tema original intacto.
+
+#### 🎨 Modificações Visuais e Temáticas
+- **Paleta Dinâmica**: Cores baseadas nas seleções nacionais (ex: Brasil verde/amarelo, México verde/branco/vermelho) via CSS custom properties.
+- **Ícones e Assets**: Substituir ícones por elementos da Copa (bola de futebol, troféu, estádios) com animações Framer Motion.
+- **Background Interativo**: Mapa do mundo destacando países participantes com hover effects para estatísticas.
+
+#### 🚀 Funcionalidades para Engajamento
+- **Pré-Lançamento Teaser**: Countdown timer no elemento "Em breve" com notificações push via Service Workers e pré-visualização limitada.
+- **Conteúdo Dinâmico**: Integração com API de dados reais da Copa (jogos, jogadores, placares) para perguntas atualizadas, com cache local (IndexedDB).
+- **Gamificação Temática**: Pontuações especiais ("Gols"), badges exclusivos ("Torcedor do Brasil"), modo "Torneio" simulando eliminatórias.
+- **Personalização**: Usuários escolhem "time favorito" no perfil, adaptando cores, sons e perguntas automaticamente.
+- **Social Sharing**: Botão para compartilhar resultados temáticos (ex: "Acertei 8/10 sobre o Brasil na Copa! 🇧🇷").
+
+#### 📱 Melhorias Técnicas
+- **Sistema de Temas Modular**: Hook `useTheme` com Context API para gerenciar temas sem impactar o original.
+- **Performance**: Lazy load de assets temáticos, imagens WebP otimizadas.
+- **Acessibilidade**: Alto contraste para bandeiras, suporte a leitores de tela.
+- **Analytics**: Rastreamento de engajamento com Google Analytics.
+
+#### 📋 Passo a Passo de Implementação
+1. **Sistema de Temas Modular**: Criar hook `useTheme` e Context API para troca dinâmica de temas.
+2. **Paleta Dinâmica**: Implementar CSS custom properties baseadas em seleções nacionais.
+3. **Ícones e Assets**: Substituir ícones genéricos por elementos da Copa com animações.
+4. **Background Interativo**: Desenvolver mapa do mundo com hover effects.
+5. **Pré-Lançamento**: Adicionar countdown timer e notificações push.
+6. **Conteúdo Dinâmico**: Integrar API da Copa com cache local.
+7. **Gamificação**: Implementar pontuações especiais e badges.
+8. **Personalização**: Adicionar seleção de time favorito no perfil.
+9. **Social Sharing**: Criar botão de compartilhamento temático.
+10. **Testes e Otimização**: Garantir que o tema original não seja impactado e tudo funcione como atualmente.
+
 ## 📋 Visão Geral dos Sprints
 
 ### Sprint 1 ✅ - MVP Funcional
@@ -307,4 +340,4 @@ Este projeto é uma demonstração técnica completa de uma aplicação moderna 
 
 **🎉 Projeto Showcase**: Esta aplicação demonstra expertise completa em React/Next.js, incluindo arquitetura moderna, acessibilidade, performance, CI/CD, monitoramento e deploy em produção.
 
-*Última atualização: 12 de outubro de 2025*
+*Última atualização: 13 de outubro de 2025*

@@ -37,6 +37,42 @@ Este documento descreve as expansões planejadas para o app, organizadas em pass
   - **Tentativas Múltiplas Educativas**: Sistema que permite ao jogador tentar novamente quando erra uma resposta, mantendo feedback visual (destaque vermelho com pulso) mas não bloqueando novas tentativas até acertar ou tempo acabar
   - **Confetti Estratégico**: Confetti removido de respostas individuais e mantido apenas na tela de parabéns final, evitando cansaço visual e tornando a celebração mais especial
 
+### ⚽ Tema da Copa do Mundo 2026
+**Status**: Planejado | **Objetivo**: Implementar tema temático para a Copa do Mundo 2026 com foco em engajamento, mantendo o tema original intacto e funcional.
+
+#### 🎨 Modificações Visuais e Temáticas
+- **Paleta Dinâmica**: Cores baseadas nas seleções nacionais (ex: bandeira do Brasil com verde/amarelo, México com verde/branco/vermelho). Usar CSS custom properties para troca automática.
+- **Ícones e Assets**: Substituir ícones genéricos por elementos da Copa (bola de futebol, troféu, estádios). Adicionar animações Framer Motion para transições (ex: bola rolando ao carregar perguntas).
+- **Background Interativo**: Fundo com mapa do mundo destacando países participantes, com hover effects mostrando estatísticas rápidas.
+
+#### 🚀 Funcionalidades para Engajamento
+- **Pré-Lançamento Teaser**: Adicionar countdown timer no elemento "Em breve" com notificações push (usando Service Workers). Permitir pré-visualização limitada do tema.
+- **Conteúdo Dinâmico**: Integrar API de dados reais da Copa (ex: jogos, jogadores, placares) para perguntas atualizadas. Usar cache local (IndexedDB) para offline.
+- **Gamificação Temática**:
+  - Pontuações especiais (ex: "Gols" em vez de pontos).
+  - Badges exclusivos (ex: "Torcedor do Brasil", "Fanático da Copa").
+  - Modo "Torneio": Simular eliminatórias com temas de países específicos.
+- **Personalização**: Permitir usuários escolherem "time favorito" no perfil, adaptando o tema automaticamente (cores, sons, perguntas).
+- **Social Sharing**: Botão para compartilhar resultados com tema da Copa (ex: "Acertei 8/10 sobre o Brasil na Copa! 🇧🇷"), integrando com redes sociais.
+
+#### 📱 Melhorias Técnicas
+- **Sistema de Temas Modular**: Criar hook `useTheme` para gerenciar temas via Context API, facilitando adição de novos (ex: Copa 2030).
+- **Performance**: Lazy load assets temáticos (imagens, sons) para reduzir bundle size. Usar WebP para imagens otimizadas.
+- **Acessibilidade**: Garantir alto contraste para cores de bandeiras, e suporte a leitores de tela para elementos "Em breve".
+- **Analytics**: Rastrear engajamento com temas (ex: tempo gasto, conversões) usando Google Analytics ou similar.
+
+#### 📋 Passo a Passo de Implementação
+1. **Sistema de Temas Modular**: Criar hook `useTheme` e Context API para troca dinâmica de temas, garantindo que o tema original não seja impactado.
+2. **Paleta Dinâmica**: Implementar CSS custom properties baseadas em seleções nacionais, com fallback para tema padrão.
+3. **Ícones e Assets**: Substituir ícones genéricos por elementos da Copa com animações, mantendo ícones originais como padrão.
+4. **Background Interativo**: Desenvolver mapa do mundo com hover effects, opcional para o tema da Copa.
+5. **Pré-Lançamento**: Adicionar countdown timer e notificações push no elemento "Em breve".
+6. **Conteúdo Dinâmico**: Integrar API da Copa com cache local, mantendo perguntas mockadas como fallback.
+7. **Gamificação**: Implementar pontuações especiais e badges, integrando com sistema existente de pontuação.
+8. **Personalização**: Adicionar seleção de time favorito no perfil, adaptando apenas quando tema da Copa estiver ativo.
+9. **Social Sharing**: Criar botão de compartilhamento temático, compatível com tema padrão.
+10. **Testes e Otimização**: Garantir que o tema original funcione como atualmente, testar acessibilidade e performance.
+
 ### 1. **Front-end para Cadastro de Questões**
    - **Objetivo**: Permitir que usuários (professores/admin) cadastrem, editem e excluam questões diretamente no app.
    - **Funcionalidades**:
@@ -156,4 +192,4 @@ Siga os passos do roadmap. Abra issues para discussões e PRs para implementaç�
 
 ---
 
-*Última atualização: 12 de outubro de 2025*
+*Última atualização: 13 de outubro de 2025*
