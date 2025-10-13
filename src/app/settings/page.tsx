@@ -42,8 +42,12 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-3 sm:p-4">
-      <div className="container mx-auto max-w-6xl">
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-3 sm:p-4 animate-fade-in flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div className="container mx-auto max-w-6xl flex-1 flex flex-col">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Configurações</h1>
           <p className="text-lg sm:text-xl text-white/80">Personalize sua experiência</p>
@@ -74,71 +78,75 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-          {/* Menu Lateral - Desktop */}
-          <Card className="hidden lg:block lg:col-span-1 bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Menu
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <nav className="space-y-2">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                        activeTab === item.id
-                          ? 'bg-white/20 text-white'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </nav>
-            </CardContent>
-          </Card>
+        {/* Conteúdo Principal */}
+        <div className="flex-1 flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+            {/* Menu Lateral - Desktop */}
+            <Card className="hidden lg:block lg:col-span-1 bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Menu
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <nav className="space-y-2">
+                  {menuItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                          activeTab === item.id
+                            ? 'bg-white/20 text-white'
+                            : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
 
-          {/* Conteúdo */}
-          <Card className="lg:col-span-3 bg-white/10 backdrop-blur-sm border-white/20">
-            <CardContent className="p-4 sm:p-6">
-              {renderContent()}
-            </CardContent>
-          </Card>
-        </div>
+            {/* Conteúdo */}
+            <Card className="lg:col-span-3 bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-4 sm:p-6">
+                {renderContent()}
+              </CardContent>
+            </Card>
+          </div>
 
-        <div className="mt-auto pb-6">
-          <motion.button
-            onClick={() => router.push('/home')}
-            className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl p-4 shadow-lg hover:bg-white/20 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group w-full max-w-xs mx-auto block"
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-          >
-            <div className="flex items-center justify-center space-x-3">
-              <div className="bg-white/20 rounded-full p-2 group-hover:scale-105 transition-transform duration-300">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          {/* Back to Home Button - Parte inferior fixa */}
+          <div className="mt-auto pb-6">
+            <motion.button
+              onClick={() => router.push('/home')}
+              className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl p-4 shadow-lg hover:bg-white/20 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 group w-full max-w-xs mx-auto block"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="flex items-center justify-center space-x-3">
+                <div className="bg-white/20 rounded-full p-2 group-hover:scale-105 transition-transform duration-300">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <div className="text-center flex-1">
+                  <h3 className="text-base sm:text-lg font-medium">Voltar ao Início</h3>
+                  <p className="text-white/60 text-xs sm:text-sm">Página inicial</p>
+                </div>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-              <div className="text-center flex-1">
-                <h3 className="text-base sm:text-lg font-medium">Voltar ao Início</h3>
-                <p className="text-white/60 text-xs sm:text-sm">Página inicial</p>
-              </div>
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </motion.button>
+            </motion.button>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
