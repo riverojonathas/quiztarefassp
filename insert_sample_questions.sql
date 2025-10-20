@@ -1,0 +1,31 @@
+-- Insert sample questions for testing
+INSERT INTO questions (text, type, category, difficulty, choices, correct_answer, explanation, tags) VALUES
+('Qual é a capital do Brasil?', 'multiple_choice', 'Geografia', 'easy',
+ '["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"]'::jsonb,
+ 'Brasília',
+ 'Brasília é a capital federal do Brasil desde 1960, projetada pelo arquiteto Oscar Niemeyer.',
+ '["Geografia", "Brasil"]'::jsonb),
+
+('Quanto é 15 + 27?', 'multiple_choice', 'Matemática', 'easy',
+ '["42", "41", "43", "40"]'::jsonb,
+ '42',
+ '15 + 27 = 42. Esta é uma adição básica de números inteiros.',
+ '["Matemática", "Adição"]'::jsonb),
+
+('Quem escreveu "Dom Quixote"?', 'multiple_choice', 'Literatura', 'medium',
+ '["Machado de Assis", "Miguel de Cervantes", "José Saramago", "Gabriel García Márquez"]'::jsonb,
+ 'Miguel de Cervantes',
+ '"Dom Quixote" é considerado o primeiro romance moderno e foi escrito por Miguel de Cervantes em 1605.',
+ '["Literatura", "Clássicos"]'::jsonb),
+
+('Qual é o maior planeta do Sistema Solar?', 'multiple_choice', 'Ciências', 'easy',
+ '["Saturno", "Júpiter", "Urano", "Netuno"]'::jsonb,
+ 'Júpiter',
+ 'Júpiter é o maior planeta do Sistema Solar, com um diâmetro de aproximadamente 143.000 km.',
+ '["Ciências", "Astronomia"]'::jsonb),
+
+('Em que ano o Brasil foi descoberto por Pedro Álvares Cabral?', 'multiple_choice', 'História', 'medium',
+ '["1492", "1500", "1498", "1502"]'::jsonb,
+ '1500',
+ 'Pedro Álvares Cabral chegou ao Brasil em 22 de abril de 1500, durante sua viagem para as Índias.',
+ '["História", "Descobrimento"]'::jsonb);

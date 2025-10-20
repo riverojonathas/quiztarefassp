@@ -3,7 +3,8 @@ import { useSessionStore } from './useSessionStore'
 
 describe('useSessionStore', () => {
   beforeEach(() => {
-    // Reset store state before each test
+    // Clear localStorage and reset store state before each test
+    localStorage.removeItem('quiz-session-storage')
     const { result } = renderHook(() => useSessionStore())
     act(() => {
       result.current.logout()
@@ -26,7 +27,7 @@ describe('useSessionStore', () => {
     expect(result.current.user).toEqual(mockUser)
   })
 
-  it('should logout correctly', () => {
+  it('should logout correctly', async () => {
     const { result } = renderHook(() => useSessionStore())
     const mockUser = { id: '1', email: 'test@example.com', name: 'Test User' }
 
@@ -35,8 +36,8 @@ describe('useSessionStore', () => {
     })
     expect(result.current.user).toEqual(mockUser)
 
-    act(() => {
-      result.current.logout()
+    await act(async () => {
+      await result.current.logout()
     })
     expect(result.current.user).toBeNull()
   })

@@ -10,7 +10,7 @@ import { Label } from '../../components/ui/label';
 import { Settings, Save, Eye, EyeOff } from 'lucide-react';
 import { useSessionStore } from '../../state/useSessionStore';
 import { useUserProfile } from '../../hooks/useUserProfile';
-import { supabase, safeSupabaseAuth } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { createAvatar } from '@dicebear/core';
 import { adventurer } from '@dicebear/collection';
 import { useAvatar } from '../../hooks/useAvatar';
@@ -169,9 +169,9 @@ function ProfileSettings() {
   useEffect(() => {
     const getUserEmail = async () => {
       try {
-        const result = await safeSupabaseAuth.getUser();
-        if ('data' in result && result.data?.user?.email) {
-          setUserEmail(result.data.user.email);
+        const { data: userData, error } = await supabase.auth.getUser();
+        if (userData?.user?.email) {
+          setUserEmail(userData.user.email);
         }
       } catch (error) {
         console.error('Error getting user email:', error);
@@ -508,11 +508,11 @@ function SecuritySettings() {
     setLoading(true);
     setMessage('');
     try {
-      const result = await safeSupabaseAuth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
-      if (result.error) throw new Error(result.error);
+      if (error) throw new Error(error.message);
 
       setMessage('Senha alterada com sucesso!');
       setCurrentPassword('');

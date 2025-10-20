@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '../../state/useSessionStore';
-import { safeSupabaseAuth, safeSupabaseDb } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
@@ -27,18 +27,18 @@ export default function SignUpPage() {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const result = await safeSupabaseAuth.getUser();
-      if ('data' in result && result.data?.user) {
+      const { data: userData, error } = await supabase.auth.getUser();
+      if (userData?.user) {
         // Get user from our user_profiles table
-        const profileResult = await safeSupabaseDb
+        const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('user_id, nickname')
-          .eq('user_id', result.data.user.id)
+          .eq('user_id', userData.user.id)
           .single();
 
-        if ('data' in profileResult && profileResult.data) {
-          const profileData = (profileResult as unknown as { data: { user_id: string; nickname?: string } }).data;
-          setUser({ id: profileData.user_id, name: profileData.nickname || result.data.user.email || 'Usuário' });
+        if (profileData) {
+          const profile = (profileData as { user_id: string; nickname?: string });
+          setUser({ id: profile.user_id, name: profile.nickname || userData.user.email || 'Usuário' });
           router.push('/home');
         } else {
           // User logged in but no profile - redirect to onboarding
@@ -71,31 +71,31 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const result = await safeSupabaseAuth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (result.error) {
-        alert('Erro no cadastro: ' + result.error);
+      if (error) {
+        alert('Erro no cadastro: ' + error.message);
         return;
       }
 
-      if ('data' in result && result.data.user) {
+      if (data.user) {
         // Check if user is already confirmed (email confirmation disabled)
-        if (result.data.user.email_confirmed_at) {
+        if (data.user.email_confirmed_at) {
           // User is confirmed, try auto-login
-          const loginResult = await safeSupabaseAuth.signInWithPassword({
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
 
-          if (loginResult.error) {
-            alert('Conta criada, mas erro no login automático: ' + loginResult.error);
+          if (loginError) {
+            alert('Conta criada, mas erro no login automático: ' + loginError.message);
             router.push('/signin');
           } else {
             // Auto-login successful - set user in store and redirect to onboarding
-            setUser({ id: result.data.user.id, name: result.data.user.email || 'Usuário' });
+            setUser({ id: data.user.id, name: data.user.email || 'Usuário' });
             router.push('/onboarding');
           }
         } else {

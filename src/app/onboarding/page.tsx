@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '../../state/useSessionStore';
-import { supabase, safeSupabaseAuth, safeSupabaseDb } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { createAvatar } from '@dicebear/core';
 import { adventurer } from '@dicebear/collection';
-import { useAvatar } from '../../hooks/useAvatar';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState<'nickname' | 'avatar'>('nickname');
@@ -38,7 +37,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const checkAuthAndProfile = async () => {
-      const result = await safeSupabaseAuth.getUser();
+      const result = await supabase.auth.getUser();
 
       if (!('data' in result) || !result.data?.user) {
         router.push('/signin');
@@ -48,28 +47,25 @@ export default function OnboardingPage() {
       const authUser = result.data.user;
 
       // Check if user already has a complete profile
-      const profileResult = await safeSupabaseDb
+      const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('user_id, nickname, avatar_seed, onboarding_completed')
         .eq('user_id', authUser.id)
         .single();
 
-      console.log('Profile query result:', profileResult);
+      console.log('Profile query result:', { profileData, profileError });
 
       // Handle the case where profile doesn't exist
-      if (profileResult.error) {
+      if (profileError) {
         // Profile doesn't exist or network error, user needs to complete onboarding
         console.log('Profile does not exist or error, starting onboarding');
         setUser({ id: authUser.id, name: authUser.email || 'Usuário' });
         return;
       }
-
-      // Profile exists - check onboarding status
-      const profileData = (profileResult as unknown as { data: { user_id: string; nickname?: string; avatar_seed?: string; onboarding_completed: boolean } }).data;
       if (profileData.onboarding_completed) {
         // Onboarding completed, go to home
         setUser({
-          id: profileData.user_id,
+          id: profileData.user_id || authUser.id,
           name: profileData.nickname || authUser.email || 'Usuário'
         });
         router.push('/home');
@@ -91,19 +87,19 @@ export default function OnboardingPage() {
 
     // Check if nickname is unique
     try {
-      const nicknameCheckResult = await safeSupabaseDb
+      const { data: existingUser, error: checkError } = await supabase
         .from('user_profiles')
         .select('user_id')
         .eq('nickname', nickname.trim())
         .single();
 
-      if (nicknameCheckResult.error && nicknameCheckResult.error !== 'Network error: Please check your internet connection and try again.') {
-        console.error('Nickname check error:', nicknameCheckResult.error);
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Nickname check error:', checkError);
         setError('Erro ao verificar disponibilidade do apelido.');
         return;
       }
 
-      if ('data' in nicknameCheckResult && nicknameCheckResult.data) {
+      if (existingUser) {
         setError('Este apelido já está em uso. Escolha outro.');
         return;
       }
@@ -128,21 +124,21 @@ export default function OnboardingPage() {
 
     try {
       // Get current auth user to ensure we have the correct ID
-      const authResult = await safeSupabaseAuth.getUser();
+      const { data: authData, error: authError } = await supabase.auth.getUser();
 
-      console.log('Onboarding handleAvatarSubmit: auth result:', authResult);
+      console.log('Onboarding handleAvatarSubmit: auth result:', { authData, authError });
 
-      if (authResult.error) {
-        console.error('Onboarding handleAvatarSubmit: Auth error:', authResult.error);
-        throw new Error('Erro de autenticação: ' + authResult.error);
+      if (authError) {
+        console.error('Onboarding handleAvatarSubmit: Auth error:', authError);
+        throw new Error('Erro de autenticação: ' + authError.message);
       }
 
-      if (!('data' in authResult) || !authResult.data?.user) {
+      if (!authData?.user) {
         console.error('Onboarding handleAvatarSubmit: No auth user found');
         throw new Error('Usuário não autenticado - faça login novamente');
       }
 
-      const authUser = authResult.data.user;
+      const authUser = authData.user;
 
       console.log('Onboarding handleAvatarSubmit: auth user ID:', authUser.id);
       console.log('Onboarding handleAvatarSubmit: auth user email:', authUser.email);
@@ -151,27 +147,49 @@ export default function OnboardingPage() {
       console.log('Onboarding handleAvatarSubmit: avatar_seed:', selectedAvatar);
 
       // First, let's check if the user exists in auth.users by trying to get their session
-      const sessionResult = await safeSupabaseAuth.getSession();
-      console.log('Onboarding handleAvatarSubmit: session result:', sessionResult);
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log('Onboarding handleAvatarSubmit: session result:', { sessionData, sessionError });
 
-      if (sessionResult.error || !('data' in sessionResult) || !sessionResult.data?.session) {
+      if (sessionError || !sessionData?.session) {
         console.error('Onboarding handleAvatarSubmit: No active session');
         throw new Error('Sessão expirada - faça login novamente');
       }
 
       // Use upsert to create or update the profile
-      // Since we temporarily removed the FK constraint, this should work
-      const { data: profileData, error: upsertError } = await supabase
+      // Try with onboarding_completed first, fallback without it if column doesn't exist
+      const upsertDataWithOnboarding = {
+        user_id: authUser.id,
+        nickname: nickname.trim(),
+        avatar_seed: selectedAvatar,
+        onboarding_completed: true
+      };
+
+      const upsertDataWithoutOnboarding = {
+        user_id: authUser.id,
+        nickname: nickname.trim(),
+        avatar_seed: selectedAvatar
+      };
+
+      let { data: profileData, error: upsertError } = await supabase
         .from('user_profiles')
-        .upsert({
-          user_id: authUser.id, // Use auth user ID directly
-          nickname: nickname.trim(),
-          avatar_seed: selectedAvatar,
-          onboarding_completed: true
-        }, {
+        .upsert(upsertDataWithOnboarding, {
           onConflict: 'user_id'
         })
         .select();
+
+      // If onboarding_completed column doesn't exist, try without it
+      if (upsertError && upsertError.message?.includes('onboarding_completed')) {
+        console.log('Onboarding handleAvatarSubmit: onboarding_completed column not found, retrying without it');
+        const retryResult = await supabase
+          .from('user_profiles')
+          .upsert(upsertDataWithoutOnboarding, {
+            onConflict: 'user_id'
+          })
+          .select();
+
+        profileData = retryResult.data;
+        upsertError = retryResult.error;
+      }
 
       console.log('Onboarding handleAvatarSubmit: upsert result:', { profileData, upsertError });
 

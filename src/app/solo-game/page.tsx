@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useReducer, useCallback } from 'react';
+import { useQuestions } from '../../hooks/useQuestions';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
-import TimeoutModal from '@/components/TimeoutModal';
-import { useAudioPool } from '@/hooks/useAudioPool';
 
 interface Question {
   id: string;
@@ -160,6 +159,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 export default function SoloGamePage() {
   const router = useRouter();
 
+  // Carregar questões do banco de dados
+  const { questions: loadedQuestions, loading: questionsLoading, error: questionsError } = useQuestions(10);
+
   // Estado centralizado do jogo usando useReducer
   const [gameState, dispatch] = useReducer(gameReducer, initialState);
 
@@ -168,56 +170,55 @@ export default function SoloGamePage() {
 
   // Estados para feedback aprimorado
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [wrongAttempts, setWrongAttempts] = useState<Set<number>>(new Set()); // Rastrear tentativas erradas por pergunta
 
   // Estado para navegação por teclado
   const [focusedOption, setFocusedOption] = useState<number | null>(null);
 
-  // Hook otimizado para áudio
-  const { playSound: playAudioSound, isInitialized: audioInitialized } = useAudioPool();
-
   // Funções para gerar sons usando Web Audio API otimizado
-  const playSound = async (frequency: number, duration: number, type: OscillatorType = 'sine') => {
-    await playAudioSound(frequency, duration, type);
-  };
+  const playSound = useCallback(async (frequency: number, duration: number, type: OscillatorType = 'sine') => {
+    // Simplified audio implementation
+    try {
+      const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-  const playCorrectSound = async () => {
-    // Sequência animada de acerto: C4 - E4 - G4 (dó-ré-mi)
-    setTimeout(() => playSound(523, 0.15, 'sine'), 0);   // C4
-    setTimeout(() => playSound(659, 0.15, 'sine'), 150); // E4
-    setTimeout(() => playSound(784, 0.3, 'sine'), 300);  // G4
-  };
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-  const playWrongSound = async () => {
-    // Som de erro animado: descida rápida com efeito de "wah"
-    setTimeout(() => playSound(400, 0.1, 'sawtooth'), 0);   // Mi grave
-    setTimeout(() => playSound(300, 0.1, 'sawtooth'), 100); // Ré grave
-    setTimeout(() => playSound(200, 0.2, 'sawtooth'), 200); // Lá baixo
-    setTimeout(() => playSound(150, 0.3, 'sawtooth'), 300); // Sol baixo
-  };
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+      oscillator.type = type;
 
-  const playGameOverSound = async () => {
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch {
+      // Silently fail if audio is not available
+    }
+  }, []);
+
+  const playGameOverSound = useCallback(async () => {
     // Sequência de notas para fim de jogo
     setTimeout(() => playSound(523, 0.2), 0);   // C
     setTimeout(() => playSound(659, 0.2), 200); // E
     setTimeout(() => playSound(784, 0.4), 400); // G
-  };
+  }, [playSound]);
 
-  const playWarningSound = async () => {
-    console.log('Tentando tocar som de aviso');
+  const playWarningSound = useCallback(async () => {
     // Som de aviso para tempo crítico - beep agudo e urgente
     await playSound(1000, 0.15, 'square'); // Beep agudo mais longo para ser mais perceptível
-  };
+  }, [playSound]);
 
-  const playStartSound = async () => {
+  const playStartSound = useCallback(async () => {
     // Sequência animada e empolgante para início do jogo: subida rápida e energética
     setTimeout(() => playSound(523, 0.1, 'sine'), 0);   // C4
     setTimeout(() => playSound(659, 0.1, 'sine'), 100); // E4
     setTimeout(() => playSound(784, 0.1, 'sine'), 200); // G4
     setTimeout(() => playSound(1047, 0.2, 'sine'), 300); // C5 - nota alta para empolgação
     setTimeout(() => playSound(1319, 0.3, 'triangle'), 400); // E5 - som mais rico para clímax
-  };
+  }, [playSound]);
 
   // Função para vibração
   const vibrate = (duration: number) => {
@@ -226,33 +227,17 @@ export default function SoloGamePage() {
     }
   };
 
-  // Mock questions for solo play
-  const mockQuestions: Question[] = [
-    {
-      id: '1',
-      statement: 'Qual é a capital do Brasil?',
-      choices: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador'],
-      correctAnswer: 2,
-      skill: 'Geografia',
-      timeLimit: 30
-    },
-    {
-      id: '2',
-      statement: 'Quanto é 15 + 27?',
-      choices: ['42', '41', '43', '40'],
-      correctAnswer: 0,
-      skill: 'Matemática',
-      timeLimit: 20
-    },
-    {
-      id: '3',
-      statement: 'Quem escreveu "Dom Quixote"?',
-      choices: ['Machado de Assis', 'Miguel de Cervantes', 'José Saramago', 'Gabriel García Márquez'],
-      correctAnswer: 1,
-      skill: 'Literatura',
-      timeLimit: 25
+  const loadNextQuestion = useCallback(() => {
+    const question = loadedQuestions[gameState.questionNumber - 1];
+    dispatch({ type: 'LOAD_QUESTION', payload: question });
+  }, [loadedQuestions, gameState.questionNumber]);
+
+  // Carregar primeira questão quando as questões são carregadas
+  useEffect(() => {
+    if (loadedQuestions.length > 0 && !gameState.gameStarted && !gameState.gameFinished) {
+      loadNextQuestion();
     }
-  ];
+  }, [loadedQuestions.length, gameState.gameStarted, gameState.gameFinished, loadNextQuestion]);
 
   useEffect(() => {
     if (gameState.gameStarted && gameState.timeLeft > 0 && !gameState.showResult) {
@@ -289,7 +274,7 @@ export default function SoloGamePage() {
         dispatch({ type: 'SET_WARNING_INTERVAL', payload: null });
       }
     };
-  }, [gameState.timeLeft, gameState.gameStarted, gameState.showResult]); // Removido warningInterval e playWarningSound das dependências
+  }, [gameState.timeLeft, gameState.gameStarted, gameState.showResult, gameState.warningInterval, playWarningSound]);
 
   const startGame = async () => {
     // Tocar som animador de início
@@ -299,21 +284,30 @@ export default function SoloGamePage() {
     loadNextQuestion();
   };
 
-  const loadNextQuestion = () => {
-    const question = mockQuestions[gameState.questionNumber - 1];
-    dispatch({ type: 'LOAD_QUESTION', payload: question });
-  };
-
   const handleAnswer = useCallback((answerIndex: number) => {
     if (!gameState.currentQuestion || gameState.showResult) return;
 
     const correct = answerIndex === gameState.currentQuestion.correctAnswer;
     const timeBonus = Math.max(0, gameState.timeLeft * 10);
 
+    // Funções de som locais
+    const playCorrectSoundLocal = async () => {
+      setTimeout(() => playSound(523, 0.15, 'sine'), 0);
+      setTimeout(() => playSound(659, 0.15, 'sine'), 150);
+      setTimeout(() => playSound(784, 0.3, 'sine'), 300);
+    };
+
+    const playWrongSoundLocal = async () => {
+      setTimeout(() => playSound(400, 0.1, 'sawtooth'), 0);
+      setTimeout(() => playSound(300, 0.1, 'sawtooth'), 100);
+      setTimeout(() => playSound(200, 0.2, 'sawtooth'), 200);
+      setTimeout(() => playSound(150, 0.3, 'sawtooth'), 300);
+    };
+
     // Feedback tátil e sonoro
     if (correct) {
       vibrate(100); // Vibração curta para acertos
-      playCorrectSound(); // Som para acerto
+      playCorrectSoundLocal(); // Som para acerto
       // Limpar tentativas erradas desta pergunta
       setWrongAttempts(prev => {
         const newSet = new Set(prev);
@@ -322,7 +316,7 @@ export default function SoloGamePage() {
       });
     } else {
       vibrate(500); // Vibração longa para erros
-      playWrongSound(); // Som para erro
+      playWrongSoundLocal(); // Som para erro
       // Adicionar à lista de tentativas erradas
       setWrongAttempts(prev => new Set(prev).add(answerIndex));
       // Não processar como resposta final - permitir tentar novamente
@@ -341,53 +335,17 @@ export default function SoloGamePage() {
 
     setTimeout(() => {
       // Verificar se é a última pergunta antes de incrementar
-      if (gameState.questionNumber >= mockQuestions.length) {
+      if (gameState.questionNumber >= loadedQuestions.length) {
         dispatch({ type: 'FINISH_GAME' });
       } else {
         dispatch({ type: 'NEXT_QUESTION' });
-        const nextQuestion = mockQuestions[gameState.questionNumber];
+        const nextQuestion = loadedQuestions[gameState.questionNumber];
         dispatch({ type: 'LOAD_QUESTION', payload: nextQuestion });
         // Limpar tentativas erradas para nova pergunta
         setWrongAttempts(new Set());
       }
     }, 2000);
-  }, [gameState]);
-
-  const handleTimeout = useCallback(() => {
-    setShowTimeoutModal(false);
-
-    // Limpar tentativas erradas
-    setWrongAttempts(new Set());
-
-    // Processar timeout como resposta errada
-    const correct = false;
-    const timeBonus = 0;
-
-    // Feedback para timeout
-    vibrate(500);
-    playWrongSound();
-
-    dispatch({
-      type: 'SUBMIT_ANSWER',
-      payload: { answerIndex: -1, isCorrect: correct, timeBonus }
-    });
-
-    // Resetar animação após 1 segundo
-    setTimeout(() => {
-      dispatch({ type: 'SET_SHAKE_ANIMATION', payload: null });
-    }, 1000);
-
-    setTimeout(() => {
-      // Verificar se é a última pergunta
-      if (gameState.questionNumber >= mockQuestions.length) {
-        dispatch({ type: 'FINISH_GAME' });
-      } else {
-        dispatch({ type: 'NEXT_QUESTION' });
-        const nextQuestion = mockQuestions[gameState.questionNumber];
-        dispatch({ type: 'LOAD_QUESTION', payload: nextQuestion });
-      }
-    }, 2000);
-  }, [gameState]);
+  }, [gameState, loadedQuestions, playSound]);
 
   const resetGame = () => {
     setWrongAttempts(new Set());
@@ -399,7 +357,7 @@ export default function SoloGamePage() {
     if (gameState.gameFinished) {
       playGameOverSound();
     }
-  }, [gameState.gameFinished]); // playGameOverSound é estável, não precisa estar nas dependências
+  }, [gameState.gameFinished, playGameOverSound]);
 
   // Suporte a navegação por teclado
   useEffect(() => {
@@ -500,6 +458,23 @@ export default function SoloGamePage() {
               Você está pronto?
             </h1>
 
+            {/* Loading state */}
+            {questionsLoading && (
+              <div className="text-center mb-6">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+                <p className="text-gray-600">Carregando questões...</p>
+              </div>
+            )}
+
+            {/* Error state */}
+            {questionsError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                <p className="text-red-800 text-sm">
+                  Erro ao carregar questões: {questionsError}
+                </p>
+              </div>
+            )}
+
             {/* Toggle Timer */}
             <div className="mb-6">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
@@ -522,7 +497,8 @@ export default function SoloGamePage() {
             <div className="space-y-3 sm:space-y-4">
               <button
                 onClick={startGame}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl py-4 sm:py-5 font-bold text-lg sm:text-xl hover:shadow-lg active:scale-95 transition-all duration-300 shadow-green-200"
+                disabled={questionsLoading || loadedQuestions.length === 0}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl py-4 sm:py-5 font-bold text-lg sm:text-xl hover:shadow-lg active:scale-95 transition-all duration-300 shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 🚀 START
               </button>
@@ -551,7 +527,7 @@ export default function SoloGamePage() {
           {/* Header do jogo */}
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-600">
-              Pergunta {gameState.questionNumber}/3
+              Pergunta {gameState.questionNumber}/{loadedQuestions.length}
             </div>
             <div className="text-sm font-semibold text-gray-900">
               {gameState.score} pts
@@ -716,4 +692,3 @@ export default function SoloGamePage() {
   );
 }
 
-export { gameReducer, initialState };

@@ -38,6 +38,7 @@ export function useUserProfile(userId: UserId | null) {
           avatar_seed: null,
           avatar_url: null,
           nickname: null,
+          role: 'student', // Default role for new users
           notifications: {
             gameInvites: true,
             dailyReminders: true,
@@ -100,6 +101,7 @@ export function useUserProfile(userId: UserId | null) {
             avatar_seed: null,
             avatar_url: null,
             nickname: null,
+            role: 'student', // Default role for new users
             notifications: {
               gameInvites: true,
               dailyReminders: true,

@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      game_configs: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          game_type: string
+          id: string
+          is_active: boolean
+          config_name: string
+          settings: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          game_type?: string
+          id?: string
+          is_active?: boolean
+          config_name: string
+          settings?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          game_type?: string
+          id?: string
+          is_active?: boolean
+          config_name?: string
+          settings?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_configs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leaderboard: {
         Row: {
           created_at: string | null

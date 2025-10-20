@@ -5,6 +5,7 @@ export interface DbUserProfile {
   avatar_seed: string | null;
   avatar_url: string | null;
   nickname: string | null;
+  role?: 'student' | 'professor' | 'admin' | null; // Made optional temporarily
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notifications: any; // Json from database - using any for Supabase Json type
   theme: string | null;
@@ -67,6 +68,7 @@ export function dbToUserProfile(db: DbUserProfile) {
     avatar_seed: db.avatar_seed,
     avatar_url: db.avatar_url,
     nickname: db.nickname,
+    role: db.role || 'student', // Default to 'student' if role is not set
     notifications: db.notifications || {
       gameInvites: false,
       dailyReminders: false,
@@ -93,6 +95,7 @@ export function userProfileToDb(app: import('../domain/models').UserProfile): Pa
     avatar_seed: app.avatar_seed,
     avatar_url: app.avatar_url,
     nickname: app.nickname,
+    role: app.role,
     notifications: app.notifications,
     theme: app.theme,
     language: app.language,

@@ -13,6 +13,7 @@ export interface UserProfile {
   avatar_seed: string | null;
   avatar_url: string | null;
   nickname: string | null;
+  role: 'student' | 'professor' | 'admin' | null;
   notifications: {
     gameInvites: boolean;
     dailyReminders: boolean;
@@ -74,3 +75,104 @@ export interface LeaderboardEntry {
   score: number;
   created_at: string | null;
 }
+
+// Game Configuration Types
+export type GameType = 'solo_game' | 'multiplayer' | 'tournament';
+
+export type ScoringMode = 'evaluation' | 'practice';
+
+export type QuestionCategory =
+  | 'Matemática'
+  | 'Geografia'
+  | 'Literatura'
+  | 'Ciências'
+  | 'História'
+  | 'Química'
+  | 'Arte'
+  | 'Biologia'
+  | 'Física'
+  | 'Inglês'
+  | 'Português';
+
+export interface GameConfigSettings {
+  // Time controls
+  timeEnabled: boolean;
+  timePerQuestion: number; // seconds (10-60)
+
+  // Question selection
+  selectedCategories: QuestionCategory[];
+  questionCount: number; // 5-20
+
+  // Scoring system
+  scoringMode: ScoringMode;
+  penaltyEnabled: boolean;
+
+  // Game mechanics
+  maxAttempts: number; // 1-3
+  shuffleAlternatives: boolean;
+  randomOrder: boolean;
+
+  // Feedback & UX
+  immediateFeedback: boolean;
+  soundEnabled: boolean;
+}
+
+export interface GameConfig {
+  id: string;
+  game_type: GameType;
+  config_name: string;
+  settings: GameConfigSettings;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+// Calculated values for game play
+export interface GameConfigCalculated {
+  config: GameConfig;
+  pointsPerQuestion: number; // 10 / questionCount
+  penaltyPerError: number; // pointsPerQuestion * 0.25 (when penaltyEnabled)
+  totalPossiblePoints: number; // Always 10
+}
+
+// Default configurations
+export const DEFAULT_GAME_CONFIG_SETTINGS: GameConfigSettings = {
+  timeEnabled: true,
+  timePerQuestion: 30,
+  selectedCategories: ['Matemática', 'Geografia', 'História'],
+  questionCount: 10,
+  scoringMode: 'evaluation',
+  penaltyEnabled: true,
+  maxAttempts: 1,
+  shuffleAlternatives: true,
+  randomOrder: true,
+  immediateFeedback: true,
+  soundEnabled: true,
+};
+
+// Predefined templates
+export const GAME_CONFIG_TEMPLATES: Record<string, GameConfigSettings> = {
+  relaxed: {
+    ...DEFAULT_GAME_CONFIG_SETTINGS,
+    timeEnabled: false,
+    questionCount: 5,
+    scoringMode: 'practice',
+    penaltyEnabled: false,
+  },
+  quickChallenge: {
+    ...DEFAULT_GAME_CONFIG_SETTINGS,
+    timePerQuestion: 10,
+    questionCount: 5,
+    scoringMode: 'evaluation',
+    penaltyEnabled: true,
+  },
+  fullAssessment: {
+    ...DEFAULT_GAME_CONFIG_SETTINGS,
+    timeEnabled: true,
+    timePerQuestion: 45,
+    questionCount: 15,
+    scoringMode: 'evaluation',
+    penaltyEnabled: true,
+  },
+};

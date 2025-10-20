@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '../../state/useSessionStore';
-import { safeSupabaseAuth, safeSupabaseDb } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { z } from 'zod';
 import { Loader2, Check, X } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido – precisamos de um endereço real para missões futuras!'),
@@ -23,20 +24,9 @@ export default function SignInPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loginError, setLoginError] = useState<string>('');
   const setUser = useSessionStore((state) => state.setUser);
+  const user = useSessionStore((state) => state.user);
+  const isLoadingSession = useSessionStore((state) => state.isLoading);
   const router = useRouter();
-
-  useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
-      const result = await safeSupabaseAuth.getUser();
-      if ('data' in result && result.data?.user) {
-        // User is authenticated, let onboarding handle the profile check
-        router.push('/onboarding');
-      }
-    };
-
-    checkUser();
-  }, [router]);
 
   const handleEmailLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,40 +47,35 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const result = await safeSupabaseAuth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (result.error) {
-        setLoginError('Erro no login: ' + result.error);
-      } else if ('data' in result && result.data.user) {
+      if (error) {
+        setLoginError('Erro no login: ' + error.message);
+      } else if (data.user) {
         // Check user profile and onboarding status
-        const profileResult = await safeSupabaseDb
+        const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('onboarding_completed, nickname, avatar_seed')
-          .eq('user_id', result.data.user.id)
+          .eq('user_id', data.user.id)
           .single();
 
-        console.log('Signin profile query result:', profileResult);
+        console.log('Signin profile query result:', { profileData, profileError });
 
-        if ('error' in profileResult && profileResult.error) {
+        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
           // For network errors, allow login without profile check
-          if (profileResult.error === 'Network error: Please check your internet connection and try again.') {
-            router.push('/onboarding');
-          } else {
-            setLoginError('Erro ao verificar perfil: ' + profileResult.error);
-          }
+          setLoginError('Erro ao verificar perfil: ' + profileError.message);
           return;
         }
 
         // If profile doesn't exist or onboarding not completed, go to onboarding
-        const profileData = (profileResult as unknown as { data: { onboarding_completed: boolean; nickname?: string; avatar_seed?: string } }).data;
         if (!profileData || !profileData.onboarding_completed) {
           router.push('/onboarding');
         } else {
           // Onboarding completed, go to home
-          setUser({ id: result.data.user.id, name: profileData.nickname || result.data.user.email || 'Usuário' });
+          setUser({ id: data.user.id, name: profileData.nickname || data.user.email || 'Usuário' });
           router.push('/home');
         }
       }
@@ -99,7 +84,26 @@ export default function SignInPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [email, password, router]);
+  }, [email, password, router, setUser]);
+
+  useEffect(() => {
+    // Only redirect if we have a confirmed user session
+    if (!isLoadingSession && user) {
+      router.push('/home');
+    }
+  }, [user, isLoadingSession, router]);
+
+  // Show loading while session is being initialized
+  if (isLoadingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+        <div className="text-center">
+          <LoadingSpinner size="xl" className="text-white mx-auto mb-4" />
+          <p className="text-white">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-8 sm:px-6 lg:px-8">
@@ -208,11 +212,11 @@ export default function SignInPage() {
                   return;
                 }
                 try {
-                  const result = await safeSupabaseAuth.resetPasswordForEmail(email, {
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
                     redirectTo: `${window.location.origin}/reset-password`,
                   });
-                  if (result.error) {
-                    setLoginError('Erro ao enviar email de reset: ' + result.error);
+                  if (error) {
+                    setLoginError('Erro ao enviar email de reset: ' + error.message);
                   } else {
                     setLoginError('Email de reset enviado! Verifique sua caixa de entrada.');
                   }
